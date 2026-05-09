@@ -4,6 +4,10 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
 
+    /* Path alias `@/*` → `src/*` (mateix que vite.config.ts). */
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
