@@ -3,7 +3,7 @@
  * Camp de contrasenya amb toggle de visibilitat.
  * Comportament idèntic a TextField però amb type=password/text dinàmic.
  */
-import { ref } from 'vue';
+import { ref, useId } from 'vue';
 
 defineProps<{
   modelValue: string;
@@ -17,16 +17,18 @@ defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
+const id = useId();
 const visible = ref(false);
 </script>
 
 <template>
   <div class="space-y-1">
-    <label class="block text-sm font-medium text-slate-700">
+    <label :for="id" class="block text-sm font-medium text-slate-700">
       {{ label }}<span v-if="required" class="text-red-500"> *</span>
     </label>
     <div class="relative">
       <input
+        :id="id"
         :type="visible ? 'text' : 'password'"
         :value="modelValue"
         :autocomplete="autocomplete"

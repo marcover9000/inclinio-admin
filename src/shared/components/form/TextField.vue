@@ -3,6 +3,8 @@
  * Camp de text amb label, validació visual i missatge d'error opcional.
  * v-model lligat al valor.
  */
+import { useId } from 'vue';
+
 defineProps<{
   modelValue: string;
   label: string;
@@ -15,14 +17,17 @@ defineProps<{
 defineEmits<{
   'update:modelValue': [value: string];
 }>();
+
+const id = useId();
 </script>
 
 <template>
   <div class="space-y-1">
-    <label class="block text-sm font-medium text-slate-700">
+    <label :for="id" class="block text-sm font-medium text-slate-700">
       {{ label }}<span v-if="required" class="text-red-500"> *</span>
     </label>
     <input
+      :id="id"
       :type="type ?? 'text'"
       :value="modelValue"
       :autocomplete="autocomplete"
