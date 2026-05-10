@@ -26,7 +26,13 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function bootstrap(): Promise<void> {
     if (hasFetchedOnce.value) return;
-    await fetchUser();
+    try {
+      await fetchUser();
+    } catch {
+      // Bootstrap és "best-effort": qualsevol error (xarxa, 5xx) es tracta com "no autenticat"
+      // perquè el router pugui redirigir a /login en lloc de bloquejar la navegació.
+      user.value = null;
+    }
     hasFetchedOnce.value = true;
   }
 
