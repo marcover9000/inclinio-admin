@@ -26,7 +26,9 @@ export async function getPerson(id: number): Promise<Person> {
   return data.data;
 }
 
-export async function updatePerson(id: number, payload: Partial<Person>): Promise<Person> {
+export type UpdatePersonPayload = Partial<Person> & { company_id?: number | null };
+
+export async function updatePerson(id: number, payload: UpdatePersonPayload): Promise<Person> {
   const { data } = await http.patch<{ data: Person }>(`/api/people/${id}`, nullifyEmptyStrings(payload));
   return data.data;
 }

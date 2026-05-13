@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getCompany, updateCompany, deleteCompany } from '../api/companies';
+import { listPeople, updatePerson } from '../api/people';
 import type { Company, Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
 import AppShell from '@/shared/components/AppShell.vue';
@@ -21,6 +22,11 @@ const company = ref<CompanyWithRelations | null>(null);
 const loading = ref(false);
 const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
+
+const showAddPerson = ref(false);
+const personSearchQuery = ref('');
+const personSuggestions = ref<Person[]>([]);
+const searchingPersons = ref(false);
 
 async function load() {
   errorMsg.value = null;
@@ -67,6 +73,51 @@ async function destroy() {
   }
 }
 
+async function searchPersons() {
+  if (!personSearchQuery.value) {
+    personSuggestions.value = [];
+    return;
+  }
+  searchingPersons.value = true;
+  try {
+    const result = await listPeople({ search: personSearchQuery.value });
+    personSuggestions.value = result.data
+      .filter(p => p.company?.id !== company.value?.id)
+      .slice(0, 8);
+  } finally {
+    searchingPersons.value = false;
+  }
+}
+
+async function attachPerson(p: Person) {
+  if (!company.value) return;
+  try {
+    await updatePerson(p.id, { company_id: company.value.id });
+    cancelAddPerson();
+    await load();
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut associar la persona.';
+    console.error(e);
+  }
+}
+
+function cancelAddPerson() {
+  showAddPerson.value = false;
+  personSearchQuery.value = '';
+  personSuggestions.value = [];
+}
+
+async function detachPerson(p: Person) {
+  if (!company.value) return;
+  try {
+    await updatePerson(p.id, { company_id: null });
+    await load();
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut desvincular la persona.';
+    console.error(e);
+  }
+}
+
 onMounted(load);
 </script>
 
@@ -97,21 +148,49 @@ onMounted(load);
       </form>
 
       <section class="rounded border border-gray-200 p-4">
-        <h2 class="mb-3 text-lg font-medium">Persones ({{ company.people?.length ?? 0 }})</h2>
+        <header class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-medium">Persones ({{ company.people?.length ?? 0 }})</h2>
+          <button v-if="!showAddPerson" type="button" @click="showAddPerson = true" class="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">
+            + Afegir persona
+          </button>
+        </header>
+
+        <div v-if="showAddPerson" class="mb-4 rounded border border-blue-200 bg-blue-50 p-3">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-medium">Afegir persona existent</p>
+            <button type="button" @click="cancelAddPerson" class="text-xs text-gray-600 hover:underline">Cancel·lar</button>
+          </div>
+          <div class="relative">
+            <input
+              v-model="personSearchQuery"
+              @input="searchPersons"
+              placeholder="Cerca per nom o email…"
+              class="w-full rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+            />
+            <ul v-if="personSuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow max-h-60 overflow-auto">
+              <li v-for="p in personSuggestions" :key="p.id" @click="attachPerson(p)" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
+                {{ p.full_name }}<span v-if="p.email" class="ml-2 text-xs text-gray-500">{{ p.email }}</span>
+                <span v-if="p.company" class="ml-2 text-xs text-orange-600">(actualment a {{ p.company.name }})</span>
+              </li>
+            </ul>
+            <p v-if="personSearchQuery && personSuggestions.length === 0 && !searchingPersons" class="mt-2 text-xs text-gray-500">
+              No s'ha trobat cap persona. <RouterLink :to="`/people/new?companyId=${company.id}`" class="text-blue-600 hover:underline">Crear nova</RouterLink>
+            </p>
+          </div>
+        </div>
+
         <p v-if="!company.people?.length" class="text-sm text-gray-500">Aquesta empresa encara no té persones associades.</p>
         <div v-else class="space-y-2">
-          <RouterLink
-            v-for="p in company.people"
-            :key="p.id"
-            :to="`/people/${p.id}`"
-            class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50"
-          >
-            <div>
+          <div v-for="p in company.people" :key="p.id" class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50">
+            <RouterLink :to="`/people/${p.id}`" class="flex-1">
               <p class="text-sm font-medium">{{ p.full_name }}</p>
               <p v-if="p.email" class="text-xs text-gray-500">{{ p.email }}</p>
+            </RouterLink>
+            <div class="flex items-center gap-3">
+              <ClientBadge v-if="p.is_client" :since="p.became_client_at" />
+              <button type="button" @click="detachPerson(p)" class="text-xs text-red-600 hover:underline">Desvincular</button>
             </div>
-            <ClientBadge v-if="p.is_client" :since="p.became_client_at" />
-          </RouterLink>
+          </div>
         </div>
       </section>
 

@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { createPerson } from '../api/people';
-import { listCompanies } from '../api/companies';
+import { listCompanies, getCompany } from '../api/companies';
 import type { Company } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 
+const route = useRoute();
 const router = useRouter();
 
 const form = ref({
@@ -46,6 +47,19 @@ function clearCompany() {
   form.value.companyName = '';
   companySuggestions.value = [];
 }
+
+onMounted(async () => {
+  const companyId = Number(route.query.companyId);
+  if (companyId && !isNaN(companyId)) {
+    try {
+      const c = await getCompany(companyId);
+      form.value.company_id = c.id;
+      form.value.companyName = c.name;
+    } catch {
+      // company not found — silently fall through to manual entry
+    }
+  }
+});
 
 async function submit() {
   loading.value = true;
