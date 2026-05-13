@@ -4,7 +4,7 @@
  * El contingut de la ruta es renderitza al <slot />.
  */
 import { useAuthStore } from '@/shared/stores/auth';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -18,11 +18,17 @@ async function handleLogout() {
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col">
     <header class="bg-white border-b border-slate-200">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center gap-6">
         <div>
           <span class="text-lg font-semibold text-slate-800">Inclinio v2</span>
           <span class="ml-2 text-sm text-slate-500">Panell d'administració</span>
         </div>
+        <nav class="flex items-center gap-4">
+          <RouterLink to="/dashboard" class="text-sm font-medium hover:text-blue-600">Dashboard</RouterLink>
+          <RouterLink to="/leads" class="text-sm font-medium hover:text-blue-600">Leads</RouterLink>
+          <RouterLink to="/people" class="text-sm font-medium hover:text-blue-600">Persones</RouterLink>
+          <RouterLink to="/companies" class="text-sm font-medium hover:text-blue-600">Empreses</RouterLink>
+        </nav>
         <div class="flex items-center gap-4">
           <span class="text-sm text-slate-600">{{ auth.user?.name }}</span>
           <button
