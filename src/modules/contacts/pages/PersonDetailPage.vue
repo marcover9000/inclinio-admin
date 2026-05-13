@@ -7,12 +7,14 @@ import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 
 const route = useRoute();
 const router = useRouter();
 const person = ref<Person | null>(null);
 const loading = ref(false);
+const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
 
 async function load() {
@@ -22,14 +24,21 @@ async function load() {
 async function save() {
   if (!person.value) return;
   loading.value = true;
-  person.value = await updatePerson(person.value.id, {
-    first_name: person.value.first_name,
-    last_name: person.value.last_name,
-    email: person.value.email,
-    phone: person.value.phone,
-    position: person.value.position,
-  });
-  loading.value = false;
+  errorMsg.value = null;
+  try {
+    person.value = await updatePerson(person.value.id, {
+      first_name: person.value.first_name,
+      last_name: person.value.last_name,
+      email: person.value.email,
+      phone: person.value.phone,
+      position: person.value.position,
+    });
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut desar els canvis.';
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function destroy() {
@@ -48,6 +57,7 @@ onMounted(load);
         <h1 class="text-2xl font-semibold">{{ person.full_name }}</h1>
         <ClientBadge v-if="person.is_client" :since="person.became_client_at" />
       </div>
+      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
       <form @submit.prevent="save" class="grid grid-cols-2 gap-4">
         <TextField v-model="person.first_name" label="Nom" />
         <TextField :model-value="person.last_name ?? ''" @update:model-value="v => person!.last_name = v" label="Cognoms" />

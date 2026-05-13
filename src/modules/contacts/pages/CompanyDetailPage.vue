@@ -8,12 +8,14 @@ import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 
 const route = useRoute();
 const router = useRouter();
 const company = ref<Company | null>(null);
 const loading = ref(false);
+const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
 
 async function load() {
@@ -23,14 +25,21 @@ async function load() {
 async function save() {
   if (!company.value) return;
   loading.value = true;
-  company.value = await updateCompany(company.value.id, {
-    name: company.value.name,
-    vat: company.value.vat,
-    website: company.value.website,
-    address: company.value.address,
-    notes: company.value.notes,
-  });
-  loading.value = false;
+  errorMsg.value = null;
+  try {
+    company.value = await updateCompany(company.value.id, {
+      name: company.value.name,
+      vat: company.value.vat,
+      website: company.value.website,
+      address: company.value.address,
+      notes: company.value.notes,
+    });
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut desar els canvis.';
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function destroy() {
@@ -49,6 +58,7 @@ onMounted(load);
         <h1 class="text-2xl font-semibold">{{ company.name }}</h1>
         <ClientBadge v-if="company.is_client" :since="company.became_client_at" />
       </div>
+      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
       <form @submit.prevent="save" class="grid grid-cols-2 gap-4">
         <TextField v-model="company.name" label="Nom" />
         <TextField :model-value="company.vat ?? ''" @update:model-value="v => company!.vat = v" label="VAT/CIF" />

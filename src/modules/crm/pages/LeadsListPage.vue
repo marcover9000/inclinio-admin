@@ -6,11 +6,13 @@ import type { Lead, LeadStatus, Paginated } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadFiltersBar from '../components/LeadFiltersBar.vue';
 
 const data = ref<Paginated<Lead> | null>(null);
 const loading = ref(false);
+const errorMsg = ref<string | null>(null);
 const search = ref('');
 const selectedStatuses = ref<LeadStatus[]>(['new', 'contacted', 'qualified', 'proposal']);
 const selectedTags = ref<string[]>([]);
@@ -18,13 +20,20 @@ const page = ref(1);
 
 async function load() {
   loading.value = true;
-  data.value = await listLeads({
-    page: page.value,
-    status: selectedStatuses.value.length ? selectedStatuses.value : undefined,
-    tags: selectedTags.value.length ? selectedTags.value : undefined,
-    search: search.value || undefined,
-  });
-  loading.value = false;
+  errorMsg.value = null;
+  try {
+    data.value = await listLeads({
+      page: page.value,
+      status: selectedStatuses.value.length ? selectedStatuses.value : undefined,
+      tags: selectedTags.value.length ? selectedTags.value : undefined,
+      search: search.value || undefined,
+    });
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut carregar les dades.';
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(load);
@@ -44,6 +53,7 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
         v-model:selectedTags="selectedTags"
         :available-tags="[]"
       />
+      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
       <DataTable
         :rows="data?.data ?? []"
         :loading="loading"

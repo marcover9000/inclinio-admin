@@ -7,22 +7,31 @@ import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
 import TextField from '@/shared/components/form/TextField.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 
 const data = ref<Paginated<Person> | null>(null);
 const loading = ref(false);
+const errorMsg = ref<string | null>(null);
 const search = ref('');
 const onlyClients = ref(false);
 const page = ref(1);
 
 async function load() {
   loading.value = true;
-  data.value = await listPeople({
-    page: page.value,
-    search: search.value || undefined,
-    is_client: onlyClients.value || undefined,
-  });
-  loading.value = false;
+  errorMsg.value = null;
+  try {
+    data.value = await listPeople({
+      page: page.value,
+      search: search.value || undefined,
+      is_client: onlyClients.value || undefined,
+    });
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut carregar les dades.';
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(load);
@@ -39,6 +48,7 @@ watch([search, onlyClients, page], load);
           <input type="checkbox" v-model="onlyClients" /> Només clients
         </label>
       </div>
+      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
       <DataTable
         :rows="data?.data ?? []"
         :loading="loading"
