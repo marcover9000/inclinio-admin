@@ -84,7 +84,7 @@ onMounted(load);
     <div class="space-y-6 p-6" v-if="lead">
       <header class="flex items-start justify-between">
         <div>
-          <h1 class="text-2xl font-semibold">{{ lead.person.full_name }}</h1>
+          <h1 class="text-2xl font-semibold">{{ lead.person?.full_name ?? '(persona eliminada)' }}</h1>
           <p v-if="lead.company" class="text-sm text-gray-500">{{ lead.company.name }}</p>
         </div>
         <div class="flex items-center gap-3">
@@ -124,7 +124,7 @@ onMounted(load);
       <ConfirmDialog
         :open="showConvertModal"
         title="Marcar com a Guanyat"
-        :message="`Això promocionarà ${lead.person.full_name}${lead.company ? ' i ' + lead.company.name : ''} a Client. Continuar?`"
+        :message="`Això promocionarà ${lead.person?.full_name ?? 'la persona'}${lead.company ? ' i ' + lead.company.name : ''} a Client. Continuar?`"
         @confirm="confirmTransition"
         @cancel="pendingTransition = null"
       />

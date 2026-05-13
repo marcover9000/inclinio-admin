@@ -73,7 +73,7 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
       >
         <template #cell-name="{ row }">
           <RouterLink :to="`/leads/${row.id}`" class="text-blue-600 hover:underline">
-            {{ row.person.full_name }}<span v-if="row.company"> · {{ row.company.name }}</span>
+            {{ row.person?.full_name ?? '(persona eliminada)' }}<span v-if="row.company"> · {{ row.company.name }}</span>
           </RouterLink>
         </template>
         <template #cell-status="{ row }"><LeadStatusBadge :status="row.status" /></template>
