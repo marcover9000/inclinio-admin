@@ -1,18 +1,31 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import type { LeadStatus } from '../types';
 import { LEAD_STATUS_LABELS, VALID_TRANSITIONS } from '../types';
 
-defineProps<{ current: LeadStatus }>();
+const props = defineProps<{ current: LeadStatus }>();
 const emit = defineEmits<{ select: [next: LeadStatus] }>();
+
+const selected = ref<string>('');
+
+function onChange() {
+  if (selected.value === '') return;
+  emit('select', selected.value as LeadStatus);
+  selected.value = '';
+}
+
+watch(() => props.current, () => {
+  selected.value = '';
+});
 </script>
 
 <template>
   <select
-    @change="emit('select', ($event.target as HTMLSelectElement).value as LeadStatus)"
+    v-model="selected"
+    @change="onChange"
     class="rounded border-gray-300 text-sm"
-    :value="''"
   >
-    <option value="" disabled>Canviar a…</option>
+    <option value="">Canviar a…</option>
     <option v-for="next in VALID_TRANSITIONS[current]" :key="next" :value="next">
       {{ LEAD_STATUS_LABELS[next] }}
     </option>
