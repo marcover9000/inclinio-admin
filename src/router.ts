@@ -40,6 +40,16 @@ const routes: RouteRecordRaw[] = [
     component: DashboardPage,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/people',
+    component: () => import('@/modules/contacts/pages/PeopleListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/people/:id',
+    component: () => import('@/modules/contacts/pages/PersonDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({
