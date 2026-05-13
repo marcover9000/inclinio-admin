@@ -26,7 +26,8 @@ export async function getLead(id: number): Promise<Lead> {
 }
 
 export interface CreateLeadPayload {
-  person: { first_name: string; last_name?: string; email?: string; phone?: string; position?: string };
+  person_id?: number;
+  person?: { first_name: string; last_name?: string; email?: string; phone?: string; position?: string };
   company?: { name: string; vat?: string; website?: string; address?: string };
   lead: { message: string; tags?: string[] };
 }
