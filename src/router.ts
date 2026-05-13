@@ -46,6 +46,11 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/people/new',
+    component: () => import('@/modules/contacts/pages/PersonCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/people/:id',
     component: () => import('@/modules/contacts/pages/PersonDetailPage.vue'),
     meta: { requiresAuth: true },
@@ -53,6 +58,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/companies',
     component: () => import('@/modules/contacts/pages/CompaniesListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/companies/new',
+    component: () => import('@/modules/contacts/pages/CompanyCreatePage.vue'),
     meta: { requiresAuth: true },
   },
   {

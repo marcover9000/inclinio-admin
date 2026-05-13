@@ -34,3 +34,17 @@ export async function updatePerson(id: number, payload: Partial<Person>): Promis
 export async function deletePerson(id: number): Promise<void> {
   await http.delete(`/api/people/${id}`);
 }
+
+export interface CreatePersonPayload {
+  first_name: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  company_id?: number;
+}
+
+export async function createPerson(payload: CreatePersonPayload): Promise<Person> {
+  const { data } = await http.post<{ data: Person }>('/api/people', payload);
+  return data.data;
+}

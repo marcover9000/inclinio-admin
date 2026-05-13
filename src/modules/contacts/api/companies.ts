@@ -33,3 +33,16 @@ export async function updateCompany(id: number, payload: Partial<Company>): Prom
 export async function deleteCompany(id: number): Promise<void> {
   await http.delete(`/api/companies/${id}`);
 }
+
+export interface CreateCompanyPayload {
+  name: string;
+  vat?: string;
+  website?: string;
+  address?: string;
+  notes?: string;
+}
+
+export async function createCompany(payload: CreateCompanyPayload): Promise<Company> {
+  const { data } = await http.post<{ data: Company }>('/api/companies', payload);
+  return data.data;
+}
