@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getPerson, updatePerson, deletePerson } from '../api/people';
 import type { Person } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
@@ -18,7 +18,15 @@ const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
 
 async function load() {
-  person.value = await getPerson(Number(route.params.id));
+  errorMsg.value = null;
+  try {
+    person.value = await getPerson(Number(route.params.id));
+  } catch (e: any) {
+    errorMsg.value = e?.response?.status === 404
+      ? 'Aquest registre no existeix o ha estat eliminat.'
+      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+    console.error(e);
+  }
 }
 
 async function save() {
@@ -52,6 +60,10 @@ onMounted(load);
 
 <template>
   <AppShell>
+    <div class="space-y-4 p-6" v-if="errorMsg && !person">
+      <AlertMessage variant="error" :message="errorMsg" />
+      <RouterLink to="/people" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
+    </div>
     <div class="space-y-4 p-6" v-if="person">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">{{ person.full_name }}</h1>

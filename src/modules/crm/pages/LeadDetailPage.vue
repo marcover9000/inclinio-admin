@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getLead, updateLead, deleteLead, transitionLeadStatus } from '../api/leads';
 import { addLeadNote, deleteLeadNote } from '../api/leadNotes';
 import type { Lead, LeadStatus } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadStatusSelector from '../components/LeadStatusSelector.vue';
 import LeadNoteList from '../components/LeadNoteList.vue';
@@ -15,6 +16,7 @@ import LeadNoteForm from '../components/LeadNoteForm.vue';
 const route = useRoute();
 const router = useRouter();
 const lead = ref<Lead | null>(null);
+const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
 const pendingTransition = ref<LeadStatus | null>(null);
 
@@ -22,7 +24,15 @@ const showConvertModal = computed(() => pendingTransition.value === 'won');
 const showSimpleConfirm = computed(() => pendingTransition.value !== null && pendingTransition.value !== 'won');
 
 async function load() {
-  lead.value = await getLead(Number(route.params.id));
+  errorMsg.value = null;
+  try {
+    lead.value = await getLead(Number(route.params.id));
+  } catch (e: any) {
+    errorMsg.value = e?.response?.status === 404
+      ? 'Aquest registre no existeix o ha estat eliminat.'
+      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+    console.error(e);
+  }
 }
 
 function onSelectStatus(next: LeadStatus) {
@@ -31,16 +41,18 @@ function onSelectStatus(next: LeadStatus) {
 
 async function confirmTransition() {
   if (!lead.value || !pendingTransition.value) return;
-  lead.value = await transitionLeadStatus(lead.value.id, pendingTransition.value);
+  await transitionLeadStatus(lead.value.id, pendingTransition.value);
   pendingTransition.value = null;
+  await load();
 }
 
 async function saveLead() {
   if (!lead.value) return;
-  lead.value = await updateLead(lead.value.id, {
+  await updateLead(lead.value.id, {
     message: lead.value.message ?? undefined,
     tags: lead.value.tags,
   });
+  await load();
 }
 
 async function destroy() {
@@ -65,6 +77,10 @@ onMounted(load);
 
 <template>
   <AppShell>
+    <div class="space-y-4 p-6" v-if="errorMsg && !lead">
+      <AlertMessage variant="error" :message="errorMsg" />
+      <RouterLink to="/leads" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
+    </div>
     <div class="space-y-6 p-6" v-if="lead">
       <header class="flex items-start justify-between">
         <div>
