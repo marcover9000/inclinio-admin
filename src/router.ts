@@ -65,6 +65,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/crm/pages/LeadsListPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/leads/:id',
+    component: () => import('@/modules/crm/pages/LeadDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({
