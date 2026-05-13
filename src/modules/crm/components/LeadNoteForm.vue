@@ -20,6 +20,6 @@ async function onSubmit() {
 <template>
   <form @submit.prevent="onSubmit" class="space-y-2">
     <TextareaField v-model="body" label="Afegir nota" placeholder="Anota un avenç, una idea, un acord…" />
-    <SubmitButton :loading="loading" :disabled="!body.trim()">Afegir</SubmitButton>
+    <SubmitButton :loading="loading" :disabled="!body.trim()" :block="true">Afegir</SubmitButton>
   </form>
 </template>

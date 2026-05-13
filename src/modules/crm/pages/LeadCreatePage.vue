@@ -108,7 +108,7 @@ async function submit() {
           <TextField v-model="form.tagsRaw" label="Tags (separats per coma)" placeholder="web, seo, branding" class="mt-4" />
         </fieldset>
 
-        <SubmitButton :loading="loading">Crear Lead</SubmitButton>
+        <SubmitButton :loading="loading" :block="true">Crear Lead</SubmitButton>
       </form>
     </div>
   </AppShell>

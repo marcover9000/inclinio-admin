@@ -89,7 +89,7 @@ async function handleSubmit() {
           autocomplete="new-password"
           required
         />
-        <SubmitButton :loading="loading" label="Restablir contrasenya" />
+        <SubmitButton :loading="loading" label="Restablir contrasenya" :block="true" />
       </form>
     </div>
   </div>
