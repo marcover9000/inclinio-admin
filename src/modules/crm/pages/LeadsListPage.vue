@@ -22,9 +22,16 @@ async function load() {
   loading.value = true;
   errorMsg.value = null;
   try {
+    if (selectedStatuses.value.length === 0) {
+      data.value = {
+        data: [],
+        meta: { current_page: 1, last_page: 1, total: 0, per_page: 20 },
+      };
+      return;
+    }
     data.value = await listLeads({
       page: page.value,
-      status: selectedStatuses.value.length ? selectedStatuses.value : undefined,
+      status: selectedStatuses.value,
       tags: selectedTags.value.length ? selectedTags.value : undefined,
       search: search.value || undefined,
     });
