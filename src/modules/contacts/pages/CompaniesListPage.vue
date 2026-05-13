@@ -1,0 +1,69 @@
+<script setup lang="ts">
+import { onMounted, ref, watch } from 'vue';
+import { RouterLink } from 'vue-router';
+import { listCompanies } from '../api/companies';
+import type { Company, Paginated } from '../types';
+import AppShell from '@/shared/components/AppShell.vue';
+import DataTable from '@/shared/components/ui/DataTable.vue';
+import Pagination from '@/shared/components/ui/Pagination.vue';
+import TextField from '@/shared/components/form/TextField.vue';
+import ClientBadge from '../components/ClientBadge.vue';
+
+const data = ref<Paginated<Company> | null>(null);
+const loading = ref(false);
+const search = ref('');
+const onlyClients = ref(false);
+const page = ref(1);
+
+async function load() {
+  loading.value = true;
+  data.value = await listCompanies({
+    page: page.value,
+    search: search.value || undefined,
+    is_client: onlyClients.value || undefined,
+  });
+  loading.value = false;
+}
+
+onMounted(load);
+watch([search, onlyClients, page], load);
+</script>
+
+<template>
+  <AppShell>
+    <div class="space-y-4 p-6">
+      <h1 class="text-2xl font-semibold">Empreses</h1>
+      <div class="flex gap-4">
+        <TextField v-model="search" label="Cerca" placeholder="Nom de l'empresa…" />
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" v-model="onlyClients" /> Només clients
+        </label>
+      </div>
+      <DataTable
+        :rows="data?.data ?? []"
+        :loading="loading"
+        :columns="[
+          { key: 'name', label: 'Nom' },
+          { key: 'vat', label: 'VAT/CIF' },
+          { key: 'is_client', label: 'Client' },
+        ]"
+      >
+        <template #cell-name="{ row }">
+          <RouterLink :to="`/companies/${row.id}`" class="text-blue-600 hover:underline">{{ row.name }}</RouterLink>
+        </template>
+        <template #cell-vat="{ row }">{{ row.vat ?? '—' }}</template>
+        <template #cell-is_client="{ row }">
+          <ClientBadge v-if="row.is_client" :since="row.became_client_at" />
+          <span v-else>—</span>
+        </template>
+      </DataTable>
+      <Pagination
+        v-if="data"
+        :current-page="data.meta.current_page"
+        :last-page="data.meta.last_page"
+        :total="data.meta.total"
+        @change="(p) => (page = p)"
+      />
+    </div>
+  </AppShell>
+</template>
