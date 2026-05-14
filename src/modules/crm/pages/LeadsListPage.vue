@@ -66,8 +66,8 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
         :loading="loading"
         :columns="[
           { key: 'name', label: 'Nom + Empresa' },
+          { key: 'subject', label: 'Assumpte' },
           { key: 'status', label: 'Estat' },
-          { key: 'tags', label: 'Tags' },
           { key: 'created_at', label: 'Creat' },
         ]"
       >
@@ -76,8 +76,17 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
             {{ row.person?.full_name ?? '(persona eliminada)' }}<span v-if="row.company"> · {{ row.company.name }}</span>
           </RouterLink>
         </template>
+        <template #cell-subject="{ row }">
+          <div class="max-w-md">
+            <p class="truncate text-sm text-gray-700" :title="row.message ?? ''">
+              {{ row.message?.trim() ? row.message.slice(0, 80) + (row.message.length > 80 ? '…' : '') : '—' }}
+            </p>
+            <div v-if="row.tags.length" class="mt-1 flex flex-wrap gap-1">
+              <span v-for="tag in row.tags" :key="tag" class="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{{ tag }}</span>
+            </div>
+          </div>
+        </template>
         <template #cell-status="{ row }"><LeadStatusBadge :status="row.status" /></template>
-        <template #cell-tags="{ row }">{{ row.tags.join(', ') || '—' }}</template>
         <template #cell-created_at="{ row }">{{ new Date(row.created_at).toLocaleDateString('ca-ES') }}</template>
       </DataTable>
       <Pagination
