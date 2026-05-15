@@ -61,7 +61,7 @@ async function handleSubmit() {
           required
           :error="errors.email"
         />
-        <SubmitButton :loading="loading" label="Enviar enllaç" />
+        <SubmitButton :loading="loading" label="Enviar enllaç" :block="true" />
       </form>
 
       <div class="text-center text-sm">

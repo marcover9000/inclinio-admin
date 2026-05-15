@@ -40,6 +40,51 @@ const routes: RouteRecordRaw[] = [
     component: DashboardPage,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/people',
+    component: () => import('@/modules/contacts/pages/PeopleListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/people/new',
+    component: () => import('@/modules/contacts/pages/PersonCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/people/:id',
+    component: () => import('@/modules/contacts/pages/PersonDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/companies',
+    component: () => import('@/modules/contacts/pages/CompaniesListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/companies/new',
+    component: () => import('@/modules/contacts/pages/CompanyCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/companies/:id',
+    component: () => import('@/modules/contacts/pages/CompanyDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/leads',
+    component: () => import('@/modules/crm/pages/LeadsListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/leads/new',
+    component: () => import('@/modules/crm/pages/LeadCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/leads/:id',
+    component: () => import('@/modules/crm/pages/LeadDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({

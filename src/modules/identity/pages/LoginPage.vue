@@ -89,7 +89,7 @@ async function handleSubmit() {
           <input v-model="form.remember" type="checkbox" class="rounded border-slate-300" />
           Recorda'm
         </label>
-        <SubmitButton :loading="loading" label="Entra" />
+        <SubmitButton :loading="loading" label="Entra" :block="true" />
       </form>
 
       <div class="text-center text-sm">
