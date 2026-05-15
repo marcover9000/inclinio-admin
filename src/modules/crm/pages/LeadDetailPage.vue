@@ -5,9 +5,11 @@ import { getLead, updateLead, deleteLead, transitionLeadStatus } from '../api/le
 import { addLeadNote, deleteLeadNote } from '../api/leadNotes';
 import type { Lead, LeadStatus } from '../types';
 import { extractErrorMessage } from '@/shared/http/errors';
+import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
+import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
@@ -18,19 +20,24 @@ import LeadNoteForm from '../components/LeadNoteForm.vue';
 const route = useRoute();
 const router = useRouter();
 const lead = ref<Lead | null>(null);
-const errorMsg = ref<string | null>(null);
+const loadError = ref<string | null>(null);
 const showDelete = ref(false);
 const pendingTransition = ref<LeadStatus | null>(null);
+
+// Bug latent corregit: abans aquests handlers no tenien try/catch i els
+// errors es perdien silenciosament. Ara es mostren a l'usuari via AlertMessage.
+const { run, loading, errorMsg: actionError } = useAsyncAction();
+const errorMsg = computed(() => actionError.value ?? loadError.value);
 
 const showConvertModal = computed(() => pendingTransition.value === 'won');
 const showSimpleConfirm = computed(() => pendingTransition.value !== null && pendingTransition.value !== 'won');
 
 async function load() {
-  errorMsg.value = null;
+  loadError.value = null;
   try {
     lead.value = await getLead(Number(route.params.id));
   } catch (e) {
-    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
+    loadError.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
       : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
@@ -41,37 +48,47 @@ function onSelectStatus(next: LeadStatus) {
   pendingTransition.value = next;
 }
 
-async function confirmTransition() {
+function confirmTransition() {
   if (!lead.value || !pendingTransition.value) return;
-  await transitionLeadStatus(lead.value.id, pendingTransition.value);
-  pendingTransition.value = null;
-  await load();
+  return run(async () => {
+    await transitionLeadStatus(lead.value!.id, pendingTransition.value!);
+    pendingTransition.value = null;
+    await load();
+  }, 'No s\'ha pogut canviar l\'estat.');
 }
 
-async function saveLead() {
+function saveLead() {
   if (!lead.value) return;
-  await updateLead(lead.value.id, {
-    message: lead.value.message ?? undefined,
-    tags: lead.value.tags,
-  });
-  await load();
+  return run(async () => {
+    await updateLead(lead.value!.id, {
+      message: lead.value!.message ?? undefined,
+      tags: lead.value!.tags,
+    });
+    await load();
+  }, 'No s\'han pogut desar els canvis.');
 }
 
-async function destroy() {
+function destroy() {
   if (!lead.value) return;
-  await deleteLead(lead.value.id);
-  router.push('/leads');
+  return run(async () => {
+    await deleteLead(lead.value!.id);
+    router.push('/leads');
+  }, 'No s\'ha pogut eliminar el lead.');
 }
 
-async function onAddNote(body: string) {
+function onAddNote(body: string) {
   if (!lead.value) return;
-  await addLeadNote(lead.value.id, body);
-  await load();
+  return run(async () => {
+    await addLeadNote(lead.value!.id, body);
+    await load();
+  }, 'No s\'ha pogut afegir la nota.');
 }
 
-async function onDeleteNote(noteId: number) {
-  await deleteLeadNote(noteId);
-  await load();
+function onDeleteNote(noteId: number) {
+  return run(async () => {
+    await deleteLeadNote(noteId);
+    await load();
+  }, 'No s\'ha pogut eliminar la nota.');
 }
 
 onMounted(load);
@@ -92,6 +109,8 @@ onMounted(load);
         </div>
       </header>
 
+      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
+
       <section class="rounded border border-neutral-200 p-4">
         <h2 class="mb-2 text-lg font-medium">Missatge inicial</h2>
         <p class="whitespace-pre-wrap text-sm text-neutral-700">{{ lead.message || '—' }}</p>
@@ -106,7 +125,7 @@ onMounted(load);
           class="w-full rounded border-neutral-300"
           placeholder="web, seo, …"
         />
-        <SubmitButton class="mt-2" @click="saveLead">Desar canvis</SubmitButton>
+        <SubmitButton class="mt-2" :loading="loading" @click="saveLead">Desar canvis</SubmitButton>
       </section>
 
       <section class="rounded border border-neutral-200 p-4">

@@ -1,42 +1,26 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { listCompanies } from '../api/companies';
-import type { Company, Paginated } from '../types';
-import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import ClientBadge from '../components/ClientBadge.vue';
+import { usePaginatedResource } from '@/shared/composables/usePaginatedResource';
 
-const data = ref<Paginated<Company> | null>(null);
-const loading = ref(false);
-const errorMsg = ref<string | null>(null);
 const search = ref('');
 const onlyClients = ref(false);
-const page = ref(1);
 
-async function load() {
-  loading.value = true;
-  errorMsg.value = null;
-  try {
-    data.value = await listCompanies({
-      page: page.value,
-      search: search.value || undefined,
-      is_client: onlyClients.value || undefined,
-    });
-  } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut carregar les dades.');
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-onMounted(load);
-watch([search, onlyClients, page], load);
+const { data, loading, errorMsg, page } = usePaginatedResource({
+  fetcher: (p) => listCompanies({
+    page: p,
+    search: search.value || undefined,
+    is_client: onlyClients.value || undefined,
+  }),
+  watchSources: [search, onlyClients],
+});
 </script>
 
 <template>

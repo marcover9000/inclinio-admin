@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { listLeads } from '../api/leads';
 import { LEAD_OPEN_STATUSES } from '../types';
-import type { Lead, LeadStatus, Paginated } from '../types';
-import { extractErrorMessage } from '@/shared/http/errors';
+import type { Lead, LeadStatus } from '../types';
 import { formatDate } from '@/shared/utils/date';
+import { usePaginatedResource } from '@/shared/composables/usePaginatedResource';
 import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
@@ -13,41 +13,29 @@ import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadFiltersBar from '../components/LeadFiltersBar.vue';
 
-const data = ref<Paginated<Lead> | null>(null);
-const loading = ref(false);
-const errorMsg = ref<string | null>(null);
 const search = ref('');
 const selectedStatuses = ref<LeadStatus[]>([...LEAD_OPEN_STATUSES]);
 const selectedTags = ref<string[]>([]);
-const page = ref(1);
 
-async function load() {
-  loading.value = true;
-  errorMsg.value = null;
-  try {
+const { data, loading, errorMsg, page } = usePaginatedResource<Lead>({
+  fetcher: (p) => {
+    // Sense estats seleccionats no té sentit consultar: pàgina buida.
     if (selectedStatuses.value.length === 0) {
-      data.value = {
+      return Promise.resolve({
         data: [],
         meta: { current_page: 1, last_page: 1, total: 0, per_page: 20 },
-      };
-      return;
+      });
     }
-    data.value = await listLeads({
-      page: page.value,
+    return listLeads({
+      page: p,
       status: selectedStatuses.value,
       tags: selectedTags.value.length ? selectedTags.value : undefined,
       search: search.value || undefined,
     });
-  } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut carregar les dades.');
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-onMounted(load);
-watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
+  },
+  watchSources: [search, selectedStatuses, selectedTags],
+  watchDeep: true,
+});
 </script>
 
 <template>

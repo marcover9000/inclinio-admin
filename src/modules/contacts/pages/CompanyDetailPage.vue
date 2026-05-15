@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getCompany, updateCompany, deleteCompany } from '../api/companies';
 import { listPeople, updatePerson } from '../api/people';
 import type { Company, Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
 import { extractErrorMessage } from '@/shared/http/errors';
+import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
@@ -22,9 +23,12 @@ type CompanyWithRelations = Company & { people?: Person[]; leads?: Lead[] };
 const route = useRoute();
 const router = useRouter();
 const company = ref<CompanyWithRelations | null>(null);
-const loading = ref(false);
-const errorMsg = ref<string | null>(null);
 const showDelete = ref(false);
+
+// Error d'operacions secundàries (càrrega, associar/desvincular persona).
+const opError = ref<string | null>(null);
+const { run, loading, errorMsg: actionError } = useAsyncAction();
+const errorMsg = computed(() => actionError.value ?? opError.value);
 
 const showAddPerson = ref(false);
 const personSearchQuery = ref('');
@@ -32,48 +36,37 @@ const personSuggestions = ref<Person[]>([]);
 const searchingPersons = ref(false);
 
 async function load() {
-  errorMsg.value = null;
+  opError.value = null;
   try {
     company.value = await getCompany(Number(route.params.id)) as CompanyWithRelations;
   } catch (e) {
-    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
+    opError.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
       : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
   }
 }
 
-async function save() {
+function save() {
   if (!company.value) return;
-  loading.value = true;
-  errorMsg.value = null;
-  try {
-    company.value = await updateCompany(company.value.id, {
-      name: company.value.name,
-      vat: company.value.vat,
-      website: company.value.website,
-      address: company.value.address,
-      notes: company.value.notes,
+  return run(async () => {
+    company.value = await updateCompany(company.value!.id, {
+      name: company.value!.name,
+      vat: company.value!.vat,
+      website: company.value!.website,
+      address: company.value!.address,
+      notes: company.value!.notes,
     }) as CompanyWithRelations;
-  } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut desar els canvis.');
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
+  }, 'No s\'han pogut desar els canvis.');
 }
 
 async function destroy() {
   if (!company.value) return;
-  errorMsg.value = null;
-  try {
-    await deleteCompany(company.value.id);
+  const ok = await run(async () => {
+    await deleteCompany(company.value!.id);
     router.push('/companies');
-  } catch (e) {
-    showDelete.value = false;
-    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut eliminar.');
-    console.error(e);
-  }
+  }, 'No s\'ha pogut eliminar.');
+  if (!ok) showDelete.value = false;
 }
 
 async function searchPersons() {
@@ -94,12 +87,13 @@ async function searchPersons() {
 
 async function attachPerson(p: Person) {
   if (!company.value) return;
+  actionError.value = null;
   try {
     await updatePerson(p.id, { company_id: company.value.id });
     cancelAddPerson();
     await load();
   } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut associar la persona.');
+    opError.value = extractErrorMessage(e, 'No s\'ha pogut associar la persona.');
     console.error(e);
   }
 }
@@ -112,11 +106,12 @@ function cancelAddPerson() {
 
 async function detachPerson(p: Person) {
   if (!company.value) return;
+  actionError.value = null;
   try {
     await updatePerson(p.id, { company_id: null });
     await load();
   } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut desvincular la persona.');
+    opError.value = extractErrorMessage(e, 'No s\'ha pogut desvincular la persona.');
     console.error(e);
   }
 }

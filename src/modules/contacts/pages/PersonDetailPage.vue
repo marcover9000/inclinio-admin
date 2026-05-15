@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getPerson, updatePerson, deletePerson } from '../api/people';
 import { listCompanies } from '../api/companies';
 import type { Company, Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
 import { extractErrorMessage } from '@/shared/http/errors';
+import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
@@ -21,23 +22,26 @@ type PersonWithLeads = Person & { leads?: Lead[] };
 const route = useRoute();
 const router = useRouter();
 const person = ref<PersonWithLeads | null>(null);
-const loading = ref(false);
-const errorMsg = ref<string | null>(null);
+const loadError = ref<string | null>(null);
 const showDelete = ref(false);
+
+const { run, loading, errorMsg: actionError } = useAsyncAction();
+// L'alerta mostra l'error d'acció (desar/eliminar) si n'hi ha, si no el de càrrega.
+const errorMsg = computed(() => actionError.value ?? loadError.value);
 
 const editCompanyId = ref<number | null>(null);
 const editCompanyName = ref<string>('');
 const companySuggestions = ref<Company[]>([]);
 
 async function load() {
-  errorMsg.value = null;
+  loadError.value = null;
   try {
     person.value = await getPerson(Number(route.params.id)) as PersonWithLeads;
     editCompanyId.value = person.value.company?.id ?? null;
     editCompanyName.value = person.value.company?.name ?? '';
     companySuggestions.value = [];
   } catch (e) {
-    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
+    loadError.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
       : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
@@ -65,39 +69,28 @@ function clearCompany() {
   companySuggestions.value = [];
 }
 
-async function save() {
+function save() {
   if (!person.value) return;
-  loading.value = true;
-  errorMsg.value = null;
-  try {
-    await updatePerson(person.value.id, {
-      first_name: person.value.first_name,
-      last_name: person.value.last_name,
-      email: person.value.email,
-      phone: person.value.phone,
-      position: person.value.position,
+  return run(async () => {
+    await updatePerson(person.value!.id, {
+      first_name: person.value!.first_name,
+      last_name: person.value!.last_name,
+      email: person.value!.email,
+      phone: person.value!.phone,
+      position: person.value!.position,
       company_id: editCompanyId.value,
     });
     await load();
-  } catch (e) {
-    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut desar els canvis.');
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
+  }, 'No s\'han pogut desar els canvis.');
 }
 
 async function destroy() {
   if (!person.value) return;
-  errorMsg.value = null;
-  try {
-    await deletePerson(person.value.id);
+  const ok = await run(async () => {
+    await deletePerson(person.value!.id);
     router.push('/people');
-  } catch (e) {
-    showDelete.value = false;
-    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut eliminar.');
-    console.error(e);
-  }
+  }, 'No s\'ha pogut eliminar.');
+  if (!ok) showDelete.value = false;
 }
 
 onMounted(load);
