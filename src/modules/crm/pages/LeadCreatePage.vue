@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createLead } from '../api/leads';
-import { listCompanies } from '@/modules/contacts/api/companies';
 import { listPeople, getPerson } from '@/modules/contacts/api/people';
 import type { Company, Person } from '@/modules/contacts/types';
 import { extractErrorMessage } from '@/shared/http/errors';
@@ -11,6 +10,7 @@ import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import CompanyPicker from '@/modules/contacts/components/CompanyPicker.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -33,18 +33,10 @@ const form = ref({
 
 const error = ref<string | null>(null);
 const loading = ref(false);
-const companySuggestions = ref<Company[]>([]);
 const personSuggestions = ref<Person[]>([]);
 const pickedPersonCompany = ref<Company | null>(null);
-
-async function searchCompanies() {
-  if (!form.value.company.name) {
-    companySuggestions.value = [];
-    return;
-  }
-  const result = await listCompanies({ search: form.value.company.name });
-  companySuggestions.value = result.data.slice(0, 5);
-}
+// El picker exposa company_id però aquest formulari només fa servir el nom.
+const pickedCompanyId = ref<number | null>(null);
 
 async function searchPeople() {
   if (form.value.person.useExisting) return;
@@ -192,12 +184,11 @@ onMounted(async () => {
           </label>
           <div v-if="form.hasCompany" class="mt-4 grid grid-cols-2 gap-4">
             <div class="col-span-2 relative">
-              <TextField v-model="form.company.name" label="Nom de l'empresa *" @input="searchCompanies" />
-              <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-                <li v-for="c in companySuggestions" :key="c.id" @click="form.company.name = c.name; companySuggestions = []" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
-                  {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
-                </li>
-              </ul>
+              <CompanyPicker
+                v-model="pickedCompanyId"
+                v-model:name="form.company.name"
+                label="Nom de l'empresa *"
+              />
             </div>
             <TextField v-model="form.company.vat" label="VAT/CIF" />
             <TextField v-model="form.company.website" label="Web" />

@@ -2,8 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getPerson, updatePerson, deletePerson } from '../api/people';
-import { listCompanies } from '../api/companies';
-import type { Company, Person } from '../types';
+import type { Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
 import { extractErrorMessage } from '@/shared/http/errors';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
@@ -15,6 +14,7 @@ import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import ClientBadge from '../components/ClientBadge.vue';
+import CompanyPicker from '../components/CompanyPicker.vue';
 import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
 
 type PersonWithLeads = Person & { leads?: Lead[] };
@@ -31,7 +31,6 @@ const errorMsg = computed(() => actionError.value ?? loadError.value);
 
 const editCompanyId = ref<number | null>(null);
 const editCompanyName = ref<string>('');
-const companySuggestions = ref<Company[]>([]);
 
 async function load() {
   loadError.value = null;
@@ -39,7 +38,6 @@ async function load() {
     person.value = await getPerson(Number(route.params.id)) as PersonWithLeads;
     editCompanyId.value = person.value.company?.id ?? null;
     editCompanyName.value = person.value.company?.name ?? '';
-    companySuggestions.value = [];
   } catch (e) {
     loadError.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
@@ -48,25 +46,9 @@ async function load() {
   }
 }
 
-async function searchCompanies() {
-  if (!editCompanyName.value) {
-    companySuggestions.value = [];
-    return;
-  }
-  const result = await listCompanies({ search: editCompanyName.value });
-  companySuggestions.value = result.data.slice(0, 5);
-}
-
-function pickCompany(c: Company) {
-  editCompanyId.value = c.id;
-  editCompanyName.value = c.name;
-  companySuggestions.value = [];
-}
-
 function clearCompany() {
   editCompanyId.value = null;
   editCompanyName.value = '';
-  companySuggestions.value = [];
 }
 
 function save() {
@@ -117,19 +99,12 @@ onMounted(load);
             <span class="rounded bg-neutral-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
             <button type="button" @click="clearCompany" class="text-xs text-danger-600 hover:underline">Desvincular</button>
           </div>
-          <div v-else class="relative">
-            <input
-              v-model="editCompanyName"
-              @input="searchCompanies"
-              placeholder="Cerca empresa…"
-              class="w-full rounded border-neutral-300 focus:ring-2 focus:ring-brand-500"
-            />
-            <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
-                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
-              </li>
-            </ul>
-          </div>
+          <CompanyPicker
+            v-else
+            v-model="editCompanyId"
+            v-model:name="editCompanyName"
+            placeholder="Cerca empresa…"
+          />
         </div>
         <div class="col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>

@@ -2,13 +2,13 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createPerson } from '../api/people';
-import { listCompanies, getCompany } from '../api/companies';
+import { getCompany } from '../api/companies';
 import { extractErrorMessage } from '@/shared/http/errors';
-import type { Company } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import CompanyPicker from '../components/CompanyPicker.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -23,30 +23,12 @@ const form = ref({
   companyName: '',
 });
 
-const companySuggestions = ref<Company[]>([]);
 const error = ref<string | null>(null);
 const loading = ref(false);
-
-async function searchCompanies() {
-  if (!form.value.companyName) {
-    companySuggestions.value = [];
-    form.value.company_id = null;
-    return;
-  }
-  const result = await listCompanies({ search: form.value.companyName });
-  companySuggestions.value = result.data.slice(0, 5);
-}
-
-function pickCompany(c: Company) {
-  form.value.company_id = c.id;
-  form.value.companyName = c.name;
-  companySuggestions.value = [];
-}
 
 function clearCompany() {
   form.value.company_id = null;
   form.value.companyName = '';
-  companySuggestions.value = [];
 }
 
 onMounted(async () => {
@@ -103,17 +85,12 @@ async function submit() {
         <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Empresa (opcional)</legend>
           <div class="relative">
-            <TextField
-              v-model="form.companyName"
+            <CompanyPicker
+              v-model="form.company_id"
+              v-model:name="form.companyName"
               label="Nom de l'empresa"
-              @input="searchCompanies"
               :disabled="form.company_id !== null"
             />
-            <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
-                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
-              </li>
-            </ul>
             <p v-if="form.company_id" class="mt-2 text-xs text-neutral-600">
               Empresa seleccionada.
               <button type="button" @click="clearCompany" class="text-brand-600 hover:underline">Esborrar</button>
