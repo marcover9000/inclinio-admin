@@ -11,12 +11,10 @@ const auth = useAuthStore();
 
 <template>
   <AppShell>
-    <div class="space-y-4">
-      <h1 class="text-2xl font-semibold text-slate-800">Hola, {{ auth.user?.name }}</h1>
-      <p class="text-slate-600">Rol: <span class="font-mono">{{ auth.user?.role }}</span></p>
-      <p class="text-sm text-slate-500">
-        Dashboard buit. Les funcionalitats arribaran a Fase 2 (CRM) i posteriors.
-      </p>
-    </div>
+    <h1 class="text-2xl font-semibold text-neutral-800">Hola, {{ auth.user?.name }}</h1>
+    <p class="text-neutral-600">Rol: <span class="font-mono">{{ auth.user?.role }}</span></p>
+    <p class="text-sm text-neutral-500">
+      Dashboard buit. Les funcionalitats arribaran a Fase 2 (CRM) i posteriors.
+    </p>
   </AppShell>
 </template>

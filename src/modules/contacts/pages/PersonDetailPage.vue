@@ -1,100 +1,78 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getPerson, updatePerson, deletePerson } from '../api/people';
-import { listCompanies } from '../api/companies';
-import type { Company, Person } from '../types';
+import type { Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
+import { extractErrorMessage } from '@/shared/http/errors';
+import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import DangerButton from '@/shared/components/ui/DangerButton.vue';
+import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import ClientBadge from '../components/ClientBadge.vue';
-import LeadStatusBadge from '@/modules/crm/components/LeadStatusBadge.vue';
+import CompanyPicker from '../components/CompanyPicker.vue';
+import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
 
 type PersonWithLeads = Person & { leads?: Lead[] };
 
 const route = useRoute();
 const router = useRouter();
 const person = ref<PersonWithLeads | null>(null);
-const loading = ref(false);
-const errorMsg = ref<string | null>(null);
+const loadError = ref<string | null>(null);
 const showDelete = ref(false);
+
+const { run, loading, errorMsg: actionError } = useAsyncAction();
+// L'alerta mostra l'error d'acció (desar/eliminar) si n'hi ha, si no el de càrrega.
+const errorMsg = computed(() => actionError.value ?? loadError.value);
 
 const editCompanyId = ref<number | null>(null);
 const editCompanyName = ref<string>('');
-const companySuggestions = ref<Company[]>([]);
 
 async function load() {
-  errorMsg.value = null;
+  loadError.value = null;
   try {
     person.value = await getPerson(Number(route.params.id)) as PersonWithLeads;
     editCompanyId.value = person.value.company?.id ?? null;
     editCompanyName.value = person.value.company?.name ?? '';
-    companySuggestions.value = [];
-  } catch (e: any) {
-    errorMsg.value = e?.response?.status === 404
+  } catch (e) {
+    loadError.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
-      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+      : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
   }
-}
-
-async function searchCompanies() {
-  if (!editCompanyName.value) {
-    companySuggestions.value = [];
-    return;
-  }
-  const result = await listCompanies({ search: editCompanyName.value });
-  companySuggestions.value = result.data.slice(0, 5);
-}
-
-function pickCompany(c: Company) {
-  editCompanyId.value = c.id;
-  editCompanyName.value = c.name;
-  companySuggestions.value = [];
 }
 
 function clearCompany() {
   editCompanyId.value = null;
   editCompanyName.value = '';
-  companySuggestions.value = [];
 }
 
-async function save() {
+function save() {
   if (!person.value) return;
-  loading.value = true;
-  errorMsg.value = null;
-  try {
-    await updatePerson(person.value.id, {
-      first_name: person.value.first_name,
-      last_name: person.value.last_name,
-      email: person.value.email,
-      phone: person.value.phone,
-      position: person.value.position,
+  return run(async () => {
+    await updatePerson(person.value!.id, {
+      first_name: person.value!.first_name,
+      last_name: person.value!.last_name,
+      email: person.value!.email,
+      phone: person.value!.phone,
+      position: person.value!.position,
       company_id: editCompanyId.value,
     });
     await load();
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut desar els canvis.';
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
+  }, 'No s\'han pogut desar els canvis.');
 }
 
 async function destroy() {
   if (!person.value) return;
-  errorMsg.value = null;
-  try {
-    await deletePerson(person.value.id);
+  const ok = await run(async () => {
+    await deletePerson(person.value!.id);
     router.push('/people');
-  } catch (e: any) {
-    showDelete.value = false;
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut eliminar.';
-    console.error(e);
-  }
+  }, 'No s\'ha pogut eliminar.');
+  if (!ok) showDelete.value = false;
 }
 
 onMounted(load);
@@ -102,67 +80,46 @@ onMounted(load);
 
 <template>
   <AppShell>
-    <div class="space-y-4 p-6" v-if="errorMsg && !person">
-      <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/people" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
-    </div>
-    <div class="space-y-4 p-6" v-if="person">
+    <NotFoundFallback v-if="errorMsg && !person" :message="errorMsg" back-to="/people" back-label="Tornar al llistat" />
+    <template v-if="person">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">{{ person.full_name }}</h1>
         <ClientBadge v-if="person.is_client" :since="person.became_client_at" />
       </div>
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
-      <form @submit.prevent="save" class="grid grid-cols-2 gap-4">
+      <form @submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextField v-model="person.first_name" label="Nom" />
         <TextField :model-value="person.last_name ?? ''" @update:model-value="v => person!.last_name = v" label="Cognoms" />
         <TextField :model-value="person.email ?? ''" @update:model-value="v => person!.email = v" label="Email" />
         <TextField :model-value="person.phone ?? ''" @update:model-value="v => person!.phone = v" label="Telèfon" />
         <TextField :model-value="person.position ?? ''" @update:model-value="v => person!.position = v" label="Càrrec" />
-        <div class="col-span-2 relative">
-          <p class="text-sm font-medium text-gray-700 mb-1">Empresa</p>
+        <div class="md:col-span-2 relative">
+          <p class="text-sm font-medium text-neutral-700 mb-1">Empresa</p>
           <div v-if="editCompanyId !== null" class="flex items-center gap-2">
-            <span class="rounded bg-gray-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
-            <button type="button" @click="clearCompany" class="text-xs text-red-600 hover:underline">Desvincular</button>
+            <span class="rounded bg-neutral-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
+            <button type="button" @click="clearCompany" class="text-xs text-danger-600 hover:underline">Desvincular</button>
           </div>
-          <div v-else class="relative">
-            <input
-              v-model="editCompanyName"
-              @input="searchCompanies"
-              placeholder="Cerca empresa…"
-              class="w-full rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-            />
-            <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
-                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-green-600">(client)</span>
-              </li>
-            </ul>
-          </div>
+          <CompanyPicker
+            v-else
+            v-model="editCompanyId"
+            v-model:name="editCompanyName"
+            placeholder="Cerca empresa…"
+          />
         </div>
-        <div class="col-span-2 flex items-center gap-3">
+        <div class="md:col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
-          <button type="button" @click="showDelete = true" class="rounded border border-red-300 bg-white px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">Eliminar</button>
+          <DangerButton @click="showDelete = true">Eliminar</DangerButton>
         </div>
       </form>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <header class="mb-3 flex items-center justify-between">
           <h2 class="text-lg font-medium">Leads ({{ person.leads?.length ?? 0 }})</h2>
-          <RouterLink :to="`/leads/new?personId=${person.id}`" class="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">+ Nou lead per aquesta persona</RouterLink>
+          <RouterLink :to="`/leads/new?personId=${person.id}`" class="rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700">+ Nou lead per aquesta persona</RouterLink>
         </header>
-        <p v-if="!person.leads?.length" class="text-sm text-gray-500">Aquesta persona encara no té cap lead.</p>
+        <p v-if="!person.leads?.length" class="text-sm text-neutral-500">Aquesta persona encara no té cap lead.</p>
         <div v-else class="space-y-2">
-          <RouterLink
-            v-for="lead in person.leads"
-            :key="lead.id"
-            :to="`/leads/${lead.id}`"
-            class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50"
-          >
-            <div>
-              <p class="text-sm font-medium">{{ lead.message?.slice(0, 80) ?? '(sense missatge)' }}<span v-if="lead.message && lead.message.length > 80">…</span></p>
-              <p class="text-xs text-gray-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }} · Origen: {{ lead.source }}</p>
-            </div>
-            <LeadStatusBadge :status="lead.status" />
-          </RouterLink>
+          <LeadCardRow v-for="lead in person.leads" :key="lead.id" :lead="lead" />
         </div>
       </section>
 
@@ -174,6 +131,6 @@ onMounted(load);
         @confirm="destroy"
         @cancel="showDelete = false"
       />
-    </div>
+    </template>
   </AppShell>
 </template>

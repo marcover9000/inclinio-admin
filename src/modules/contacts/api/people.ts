@@ -1,4 +1,5 @@
 import { http } from '@/shared/http/client';
+import { nullifyEmptyStrings } from '@/shared/http/payload';
 import type { Paginated, Person } from '../types';
 
 export interface ListPeopleParams {
@@ -6,14 +7,6 @@ export interface ListPeopleParams {
   search?: string;
   is_client?: boolean;
   company_id?: number;
-}
-
-function nullifyEmptyStrings<T extends Record<string, unknown>>(payload: T): T {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(payload)) {
-    out[k] = v === '' ? null : v;
-  }
-  return out as T;
 }
 
 export async function listPeople(params: ListPeopleParams = {}): Promise<Paginated<Person>> {

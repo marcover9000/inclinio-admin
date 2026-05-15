@@ -27,12 +27,12 @@ defineEmits<{
     ></div>
     <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
       <h3 class="text-lg font-semibold">{{ title }}</h3>
-      <p class="mt-2 text-sm text-gray-600 whitespace-pre-wrap">{{ message }}</p>
+      <p class="mt-2 text-sm text-neutral-600 whitespace-pre-wrap">{{ message }}</p>
       <div class="mt-6 flex justify-end gap-2">
         <button
           type="button"
           @click="$emit('cancel')"
-          class="rounded border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+          class="rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-neutral-50"
         >
           {{ cancelLabel ?? 'Cancel·lar' }}
         </button>
@@ -41,7 +41,7 @@ defineEmits<{
           @click="$emit('confirm')"
           :class="[
             'rounded px-4 py-2 text-sm text-white',
-            danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700',
+            danger ? 'bg-danger-600 hover:bg-danger-700' : 'bg-brand-600 hover:bg-brand-700',
           ]"
         >
           {{ confirmLabel ?? 'Confirmar' }}

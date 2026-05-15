@@ -26,6 +26,15 @@ export interface LeadNote {
 
 export type { Paginated };
 
+export const LEAD_STATUSES: readonly LeadStatus[] = [
+  'new', 'contacted', 'qualified', 'proposal', 'won', 'lost',
+];
+
+// Estats "oberts": exclou els terminals (won/lost). Default del filtre del llistat.
+export const LEAD_OPEN_STATUSES: readonly LeadStatus[] = LEAD_STATUSES.filter(
+  (s) => s !== 'won' && s !== 'lost',
+);
+
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'Nou',
   contacted: 'Contactat',

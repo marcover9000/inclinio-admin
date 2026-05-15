@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createCompany } from '../api/companies';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
@@ -33,8 +34,8 @@ async function submit() {
       notes: form.value.notes || undefined,
     });
     router.push(`/companies/${company.id}`);
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'No s\'ha pogut crear l\'empresa.';
+  } catch (e) {
+    error.value = extractErrorMessage(e, 'No s\'ha pogut crear l\'empresa.');
   } finally {
     loading.value = false;
   }
@@ -43,29 +44,27 @@ async function submit() {
 
 <template>
   <AppShell>
-    <div class="space-y-6 p-6">
-      <h1 class="text-2xl font-semibold">Nova empresa</h1>
-      <AlertMessage v-if="error" variant="error" :message="error" />
-      <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-gray-200 p-4">
-          <legend class="px-2 text-sm font-medium">Dades de l'empresa</legend>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <TextField v-model="form.name" label="Nom *" />
-            </div>
-            <TextField v-model="form.vat" label="VAT/CIF" />
-            <TextField v-model="form.website" label="Web" />
-            <div class="col-span-2">
-              <TextField v-model="form.address" label="Adreça" />
-            </div>
-            <div class="col-span-2">
-              <TextareaField v-model="form.notes" label="Notes" :rows="4" />
-            </div>
+    <h1 class="text-2xl font-semibold">Nova empresa</h1>
+    <AlertMessage v-if="error" variant="error" :message="error" />
+    <form @submit.prevent="submit" class="space-y-6">
+      <fieldset class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Dades de l'empresa</legend>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <TextField v-model="form.name" label="Nom *" />
           </div>
-        </fieldset>
+          <TextField v-model="form.vat" label="VAT/CIF" />
+          <TextField v-model="form.website" label="Web" />
+          <div class="md:col-span-2">
+            <TextField v-model="form.address" label="Adreça" />
+          </div>
+          <div class="md:col-span-2">
+            <TextareaField v-model="form.notes" label="Notes" :rows="4" />
+          </div>
+        </div>
+      </fieldset>
 
-        <SubmitButton :loading="loading" :block="true">Crear empresa</SubmitButton>
-      </form>
-    </div>
+      <SubmitButton :loading="loading" :block="true">Crear empresa</SubmitButton>
+    </form>
   </AppShell>
 </template>

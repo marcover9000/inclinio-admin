@@ -1,18 +1,11 @@
 import { http } from '@/shared/http/client';
+import { nullifyEmptyStrings } from '@/shared/http/payload';
 import type { Company, Paginated } from '../types';
 
 export interface ListCompaniesParams {
   page?: number;
   search?: string;
   is_client?: boolean;
-}
-
-function nullifyEmptyStrings<T extends Record<string, unknown>>(payload: T): T {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(payload)) {
-    out[k] = v === '' ? null : v;
-  }
-  return out as T;
 }
 
 export async function listCompanies(params: ListCompaniesParams = {}): Promise<Paginated<Company>> {
