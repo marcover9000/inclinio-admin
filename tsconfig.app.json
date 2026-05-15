@@ -4,9 +4,9 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
 
-    /* Path alias `@/*` → `src/*` (mateix que vite.config.ts). */
-    "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
+    /* Path alias `@/*` → `src/*` (mateix que vite.config.ts).
+       Sense `baseUrl`: TS resol `paths` relatiu a aquest fitxer (a prova de TS 7.0). */
+    "paths": { "@/*": ["./src/*"] },
 
     /* Linting */
     "noUnusedLocals": true,
