@@ -1,3 +1,68 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Design system — tokens de color.
+ *
+ * Els valors són canals RGB separats per espais (no `#hex`) perquè Tailwind
+ * els consumeix amb `rgb(var(--token) / <alpha-value>)` i així els modificadors
+ * d'opacitat (`bg-brand-600/50`) segueixen funcionant.
+ *
+ * Per fer theming (dark mode o white-label) només cal redefinir aquestes
+ * variables sota un selector (`.dark`, `[data-theme="x"]`); cap component
+ * s'ha de tocar. Vegeu `documentacio/05-design-system.md`.
+ *
+ * Famílies: brand, neutral, success, warning, danger, info, accent.
+ * `neutral` unifica el que abans eren `gray-*` i `slate-*` (una sola escala
+ * neutra; base = paleta slate de Tailwind).
+ */
+:root {
+  /* brand — accions primàries, enllaços (= blue Tailwind) */
+  --color-brand-50: 239 246 255;
+  --color-brand-100: 219 234 254;
+  --color-brand-200: 191 219 254;
+  --color-brand-500: 59 130 246;
+  --color-brand-600: 37 99 235;
+  --color-brand-700: 29 78 216;
+  --color-brand-800: 30 64 175;
+
+  /* neutral — text, vores, superfícies (= slate Tailwind) */
+  --color-neutral-50: 248 250 252;
+  --color-neutral-100: 241 245 249;
+  --color-neutral-200: 226 232 240;
+  --color-neutral-300: 203 213 225;
+  --color-neutral-500: 100 116 139;
+  --color-neutral-600: 71 85 105;
+  --color-neutral-700: 51 65 85;
+  --color-neutral-800: 30 41 59;
+
+  /* success — estats positius, client, lead won (= green) */
+  --color-success-50: 240 253 244;
+  --color-success-100: 220 252 231;
+  --color-success-200: 187 247 208;
+  --color-success-600: 22 163 74;
+  --color-success-800: 22 101 52;
+
+  /* warning — atenció, lead contacted (= yellow) */
+  --color-warning-100: 254 249 195;
+  --color-warning-800: 133 77 14;
+
+  /* danger — errors, eliminar, lead lost-context (= red) */
+  --color-danger-50: 254 242 242;
+  --color-danger-200: 254 202 202;
+  --color-danger-300: 252 165 165;
+  --color-danger-400: 248 113 113;
+  --color-danger-500: 239 68 68;
+  --color-danger-600: 220 38 38;
+  --color-danger-700: 185 28 28;
+  --color-danger-800: 153 27 27;
+
+  /* info — informatiu, lead qualified (= purple) */
+  --color-info-100: 243 232 255;
+  --color-info-800: 107 33 168;
+
+  /* accent — destacat secundari, lead proposal (= orange) */
+  --color-accent-100: 255 237 213;
+  --color-accent-800: 154 52 18;
+}
