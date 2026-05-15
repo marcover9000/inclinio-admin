@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { getLead, updateLead, deleteLead, transitionLeadStatus } from '../api/leads';
 import { addLeadNote, deleteLeadNote } from '../api/leadNotes';
 import type { Lead, LeadStatus } from '../types';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
@@ -28,10 +29,10 @@ async function load() {
   errorMsg.value = null;
   try {
     lead.value = await getLead(Number(route.params.id));
-  } catch (e: any) {
-    errorMsg.value = e?.response?.status === 404
+  } catch (e) {
+    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
-      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+      : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
   }
 }

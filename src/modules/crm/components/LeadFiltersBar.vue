@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LEAD_STATUS_LABELS, type LeadStatus } from '../types';
+import { LEAD_STATUS_LABELS, LEAD_STATUSES, type LeadStatus } from '../types';
 import TextField from '@/shared/components/form/TextField.vue';
 
 defineProps<{
@@ -15,7 +15,7 @@ defineEmits<{
   'update:selectedTags': [v: string[]];
 }>();
 
-const allStatuses: LeadStatus[] = ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'];
+const allStatuses = LEAD_STATUSES;
 </script>
 
 <template>

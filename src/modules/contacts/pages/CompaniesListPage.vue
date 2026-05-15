@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { listCompanies } from '../api/companies';
 import type { Company, Paginated } from '../types';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
@@ -26,8 +27,8 @@ async function load() {
       search: search.value || undefined,
       is_client: onlyClients.value || undefined,
     });
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut carregar les dades.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut carregar les dades.');
     console.error(e);
   } finally {
     loading.value = false;

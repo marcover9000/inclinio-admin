@@ -5,6 +5,7 @@ import { getCompany, updateCompany, deleteCompany } from '../api/companies';
 import { listPeople, updatePerson } from '../api/people';
 import type { Company, Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
@@ -34,10 +35,10 @@ async function load() {
   errorMsg.value = null;
   try {
     company.value = await getCompany(Number(route.params.id)) as CompanyWithRelations;
-  } catch (e: any) {
-    errorMsg.value = e?.response?.status === 404
+  } catch (e) {
+    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
-      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+      : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
   }
 }
@@ -54,8 +55,8 @@ async function save() {
       address: company.value.address,
       notes: company.value.notes,
     }) as CompanyWithRelations;
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut desar els canvis.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut desar els canvis.');
     console.error(e);
   } finally {
     loading.value = false;
@@ -68,9 +69,9 @@ async function destroy() {
   try {
     await deleteCompany(company.value.id);
     router.push('/companies');
-  } catch (e: any) {
+  } catch (e) {
     showDelete.value = false;
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut eliminar.';
+    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut eliminar.');
     console.error(e);
   }
 }
@@ -97,8 +98,8 @@ async function attachPerson(p: Person) {
     await updatePerson(p.id, { company_id: company.value.id });
     cancelAddPerson();
     await load();
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut associar la persona.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut associar la persona.');
     console.error(e);
   }
 }
@@ -114,8 +115,8 @@ async function detachPerson(p: Person) {
   try {
     await updatePerson(p.id, { company_id: null });
     await load();
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut desvincular la persona.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut desvincular la persona.');
     console.error(e);
   }
 }

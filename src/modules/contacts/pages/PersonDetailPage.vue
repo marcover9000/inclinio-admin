@@ -5,6 +5,7 @@ import { getPerson, updatePerson, deletePerson } from '../api/people';
 import { listCompanies } from '../api/companies';
 import type { Company, Person } from '../types';
 import type { Lead } from '@/modules/crm/types';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
@@ -35,10 +36,10 @@ async function load() {
     editCompanyId.value = person.value.company?.id ?? null;
     editCompanyName.value = person.value.company?.name ?? '';
     companySuggestions.value = [];
-  } catch (e: any) {
-    errorMsg.value = e?.response?.status === 404
+  } catch (e) {
+    errorMsg.value = (e as { response?: { status?: number } })?.response?.status === 404
       ? 'Aquest registre no existeix o ha estat eliminat.'
-      : (e?.response?.data?.message ?? 'No s\'ha pogut carregar el registre.');
+      : extractErrorMessage(e, 'No s\'ha pogut carregar el registre.');
     console.error(e);
   }
 }
@@ -78,8 +79,8 @@ async function save() {
       company_id: editCompanyId.value,
     });
     await load();
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut desar els canvis.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut desar els canvis.');
     console.error(e);
   } finally {
     loading.value = false;
@@ -92,9 +93,9 @@ async function destroy() {
   try {
     await deletePerson(person.value.id);
     router.push('/people');
-  } catch (e: any) {
+  } catch (e) {
     showDelete.value = false;
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'ha pogut eliminar.';
+    errorMsg.value = extractErrorMessage(e, 'No s\'ha pogut eliminar.');
     console.error(e);
   }
 }

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createCompany } from '../api/companies';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
@@ -33,8 +34,8 @@ async function submit() {
       notes: form.value.notes || undefined,
     });
     router.push(`/companies/${company.id}`);
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'No s\'ha pogut crear l\'empresa.';
+  } catch (e) {
+    error.value = extractErrorMessage(e, 'No s\'ha pogut crear l\'empresa.');
   } finally {
     loading.value = false;
   }

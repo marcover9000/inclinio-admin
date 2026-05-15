@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 import type { Lead } from '../types';
+import { formatDate } from '@/shared/utils/date';
 import LeadStatusBadge from './LeadStatusBadge.vue';
 
 /*
@@ -19,7 +20,7 @@ defineProps<{ lead: Lead }>();
         {{ lead.message?.slice(0, 80) ?? '(sense missatge)' }}<span v-if="lead.message && lead.message.length > 80">…</span>
       </p>
       <p class="text-xs text-neutral-500">
-        {{ new Date(lead.created_at).toLocaleDateString('ca-ES') }} · Origen: {{ lead.source }}
+        {{ formatDate(lead.created_at) }} · Origen: {{ lead.source }}
       </p>
     </div>
     <LeadStatusBadge :status="lead.status" />

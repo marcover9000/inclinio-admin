@@ -2,7 +2,10 @@
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { listLeads } from '../api/leads';
+import { LEAD_OPEN_STATUSES } from '../types';
 import type { Lead, LeadStatus, Paginated } from '../types';
+import { extractErrorMessage } from '@/shared/http/errors';
+import { formatDate } from '@/shared/utils/date';
 import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
@@ -14,7 +17,7 @@ const data = ref<Paginated<Lead> | null>(null);
 const loading = ref(false);
 const errorMsg = ref<string | null>(null);
 const search = ref('');
-const selectedStatuses = ref<LeadStatus[]>(['new', 'contacted', 'qualified', 'proposal']);
+const selectedStatuses = ref<LeadStatus[]>([...LEAD_OPEN_STATUSES]);
 const selectedTags = ref<string[]>([]);
 const page = ref(1);
 
@@ -35,8 +38,8 @@ async function load() {
       tags: selectedTags.value.length ? selectedTags.value : undefined,
       search: search.value || undefined,
     });
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message ?? 'No s\'han pogut carregar les dades.';
+  } catch (e) {
+    errorMsg.value = extractErrorMessage(e, 'No s\'han pogut carregar les dades.');
     console.error(e);
   } finally {
     loading.value = false;
@@ -87,7 +90,7 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
           </div>
         </template>
         <template #cell-status="{ row }"><LeadStatusBadge :status="row.status" /></template>
-        <template #cell-created_at="{ row }">{{ new Date(row.created_at).toLocaleDateString('ca-ES') }}</template>
+        <template #cell-created_at="{ row }">{{ formatDate(row.created_at) }}</template>
       </DataTable>
       <Pagination
         v-if="data"

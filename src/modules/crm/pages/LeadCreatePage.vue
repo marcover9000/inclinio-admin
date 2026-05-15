@@ -5,6 +5,7 @@ import { createLead } from '../api/leads';
 import { listCompanies } from '@/modules/contacts/api/companies';
 import { listPeople, getPerson } from '@/modules/contacts/api/people';
 import type { Company, Person } from '@/modules/contacts/types';
+import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
@@ -109,8 +110,8 @@ async function submit() {
       },
     });
     router.push(`/leads/${lead.id}`);
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'Error desconegut.';
+  } catch (e) {
+    error.value = extractErrorMessage(e, 'Error desconegut.');
   } finally {
     loading.value = false;
   }

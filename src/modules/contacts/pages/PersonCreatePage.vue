@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createPerson } from '../api/people';
 import { listCompanies, getCompany } from '../api/companies';
+import { extractErrorMessage } from '@/shared/http/errors';
 import type { Company } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
@@ -74,8 +75,8 @@ async function submit() {
       company_id: form.value.company_id ?? undefined,
     });
     router.push(`/people/${person.id}`);
-  } catch (e: any) {
-    error.value = e?.response?.data?.message ?? 'No s\'ha pogut crear la persona.';
+  } catch (e) {
+    error.value = extractErrorMessage(e, 'No s\'ha pogut crear la persona.');
   } finally {
     loading.value = false;
   }
