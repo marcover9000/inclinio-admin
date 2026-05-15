@@ -87,13 +87,13 @@ onMounted(load);
         <ClientBadge v-if="person.is_client" :since="person.became_client_at" />
       </div>
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
-      <form @submit.prevent="save" class="grid grid-cols-2 gap-4">
+      <form @submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextField v-model="person.first_name" label="Nom" />
         <TextField :model-value="person.last_name ?? ''" @update:model-value="v => person!.last_name = v" label="Cognoms" />
         <TextField :model-value="person.email ?? ''" @update:model-value="v => person!.email = v" label="Email" />
         <TextField :model-value="person.phone ?? ''" @update:model-value="v => person!.phone = v" label="Telèfon" />
         <TextField :model-value="person.position ?? ''" @update:model-value="v => person!.position = v" label="Càrrec" />
-        <div class="col-span-2 relative">
+        <div class="md:col-span-2 relative">
           <p class="text-sm font-medium text-neutral-700 mb-1">Empresa</p>
           <div v-if="editCompanyId !== null" class="flex items-center gap-2">
             <span class="rounded bg-neutral-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
@@ -106,7 +106,7 @@ onMounted(load);
             placeholder="Cerca empresa…"
           />
         </div>
-        <div class="col-span-2 flex items-center gap-3">
+        <div class="md:col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
           <DangerButton @click="showDelete = true">Eliminar</DangerButton>
         </div>

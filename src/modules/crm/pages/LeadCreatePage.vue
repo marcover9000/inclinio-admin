@@ -134,7 +134,7 @@ onMounted(async () => {
           <span>Aquesta persona ja existeix al CRM.</span>
           <button type="button" @click="clearPersonSelection" class="text-xs text-brand-700 underline hover:text-brand-900">Esborrar selecció</button>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="relative">
             <TextField
               v-model="form.person.first_name"
@@ -181,8 +181,8 @@ onMounted(async () => {
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" v-model="form.hasCompany" /> Aquest lead està lligat a una empresa
         </label>
-        <div v-if="form.hasCompany" class="mt-4 grid grid-cols-2 gap-4">
-          <div class="col-span-2 relative">
+        <div v-if="form.hasCompany" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2 relative">
             <CompanyPicker
               v-model="pickedCompanyId"
               v-model:name="form.company.name"

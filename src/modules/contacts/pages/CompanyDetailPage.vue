@@ -128,15 +128,15 @@ onMounted(load);
         <ClientBadge v-if="company.is_client" :since="company.became_client_at" />
       </div>
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
-      <form @submit.prevent="save" class="grid grid-cols-2 gap-4">
+      <form @submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextField v-model="company.name" label="Nom" />
         <TextField :model-value="company.vat ?? ''" @update:model-value="v => company!.vat = v" label="VAT/CIF" />
         <TextField :model-value="company.website ?? ''" @update:model-value="v => company!.website = v" label="Web" />
         <TextField :model-value="company.address ?? ''" @update:model-value="v => company!.address = v" label="Adreça" />
-        <div class="col-span-2">
+        <div class="md:col-span-2">
           <TextareaField :model-value="company.notes ?? ''" @update:model-value="v => company!.notes = v" label="Notes" :rows="5" />
         </div>
-        <div class="col-span-2 flex items-center gap-3">
+        <div class="md:col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
           <DangerButton @click="showDelete = true">Eliminar</DangerButton>
         </div>

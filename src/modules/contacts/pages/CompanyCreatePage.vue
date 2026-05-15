@@ -49,16 +49,16 @@ async function submit() {
     <form @submit.prevent="submit" class="space-y-6">
       <fieldset class="rounded border border-neutral-200 p-4">
         <legend class="px-2 text-sm font-medium">Dades de l'empresa</legend>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="col-span-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
             <TextField v-model="form.name" label="Nom *" />
           </div>
           <TextField v-model="form.vat" label="VAT/CIF" />
           <TextField v-model="form.website" label="Web" />
-          <div class="col-span-2">
+          <div class="md:col-span-2">
             <TextField v-model="form.address" label="Adreça" />
           </div>
-          <div class="col-span-2">
+          <div class="md:col-span-2">
             <TextareaField v-model="form.notes" label="Notes" :rows="4" />
           </div>
         </div>

@@ -37,7 +37,7 @@ async function handleLogout() {
 <template>
   <div class="min-h-screen bg-neutral-50 flex flex-col">
     <header class="bg-white border-b border-neutral-200">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center gap-6">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-x-6 gap-y-2">
         <div>
           <span class="text-lg font-semibold text-neutral-800">Inclinio v2</span>
           <span class="ml-2 text-sm text-neutral-500">Panell d'administració</span>

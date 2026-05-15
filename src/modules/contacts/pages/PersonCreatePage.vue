@@ -72,7 +72,7 @@ async function submit() {
     <form @submit.prevent="submit" class="space-y-6">
       <fieldset class="rounded border border-neutral-200 p-4">
         <legend class="px-2 text-sm font-medium">Dades de la persona</legend>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextField v-model="form.first_name" label="Nom *" />
           <TextField v-model="form.last_name" label="Cognoms" />
           <TextField v-model="form.email" label="Email" />

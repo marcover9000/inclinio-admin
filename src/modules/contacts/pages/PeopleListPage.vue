@@ -29,7 +29,7 @@ const { data, loading, errorMsg, page } = usePaginatedResource({
       <h1 class="text-2xl font-semibold">Persones</h1>
       <RouterLink to="/people/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nova persona</RouterLink>
     </div>
-    <div class="flex gap-4">
+    <div class="flex flex-wrap items-end gap-4">
       <TextField v-model="search" label="Cerca" placeholder="Nom o email…" />
       <label class="flex items-center gap-2 text-sm">
         <input type="checkbox" v-model="onlyClients" /> Només clients
