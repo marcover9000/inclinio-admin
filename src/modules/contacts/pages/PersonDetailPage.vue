@@ -104,7 +104,7 @@ onMounted(load);
   <AppShell>
     <div class="space-y-4 p-6" v-if="errorMsg && !person">
       <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/people" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
+      <RouterLink to="/people" class="text-sm text-brand-600 hover:underline">← Tornar al llistat</RouterLink>
     </div>
     <div class="space-y-4 p-6" v-if="person">
       <div class="flex items-center justify-between">
@@ -119,47 +119,47 @@ onMounted(load);
         <TextField :model-value="person.phone ?? ''" @update:model-value="v => person!.phone = v" label="Telèfon" />
         <TextField :model-value="person.position ?? ''" @update:model-value="v => person!.position = v" label="Càrrec" />
         <div class="col-span-2 relative">
-          <p class="text-sm font-medium text-gray-700 mb-1">Empresa</p>
+          <p class="text-sm font-medium text-neutral-700 mb-1">Empresa</p>
           <div v-if="editCompanyId !== null" class="flex items-center gap-2">
-            <span class="rounded bg-gray-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
-            <button type="button" @click="clearCompany" class="text-xs text-red-600 hover:underline">Desvincular</button>
+            <span class="rounded bg-neutral-100 px-3 py-1.5 text-sm">{{ editCompanyName }}</span>
+            <button type="button" @click="clearCompany" class="text-xs text-danger-600 hover:underline">Desvincular</button>
           </div>
           <div v-else class="relative">
             <input
               v-model="editCompanyName"
               @input="searchCompanies"
               placeholder="Cerca empresa…"
-              class="w-full rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+              class="w-full rounded border-neutral-300 focus:ring-2 focus:ring-brand-500"
             />
             <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
-                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-green-600">(client)</span>
+              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
+                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
               </li>
             </ul>
           </div>
         </div>
         <div class="col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
-          <button type="button" @click="showDelete = true" class="rounded border border-red-300 bg-white px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">Eliminar</button>
+          <button type="button" @click="showDelete = true" class="rounded border border-danger-300 bg-white px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 hover:border-danger-400 focus:outline-none focus:ring-2 focus:ring-danger-200">Eliminar</button>
         </div>
       </form>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <header class="mb-3 flex items-center justify-between">
           <h2 class="text-lg font-medium">Leads ({{ person.leads?.length ?? 0 }})</h2>
-          <RouterLink :to="`/leads/new?personId=${person.id}`" class="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">+ Nou lead per aquesta persona</RouterLink>
+          <RouterLink :to="`/leads/new?personId=${person.id}`" class="rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700">+ Nou lead per aquesta persona</RouterLink>
         </header>
-        <p v-if="!person.leads?.length" class="text-sm text-gray-500">Aquesta persona encara no té cap lead.</p>
+        <p v-if="!person.leads?.length" class="text-sm text-neutral-500">Aquesta persona encara no té cap lead.</p>
         <div v-else class="space-y-2">
           <RouterLink
             v-for="lead in person.leads"
             :key="lead.id"
             :to="`/leads/${lead.id}`"
-            class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50"
+            class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50"
           >
             <div>
               <p class="text-sm font-medium">{{ lead.message?.slice(0, 80) ?? '(sense missatge)' }}<span v-if="lead.message && lead.message.length > 80">…</span></p>
-              <p class="text-xs text-gray-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }} · Origen: {{ lead.source }}</p>
+              <p class="text-xs text-neutral-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }} · Origen: {{ lead.source }}</p>
             </div>
             <LeadStatusBadge :status="lead.status" />
           </RouterLink>

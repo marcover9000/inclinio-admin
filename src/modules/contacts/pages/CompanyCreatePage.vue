@@ -47,7 +47,7 @@ async function submit() {
       <h1 class="text-2xl font-semibold">Nova empresa</h1>
       <AlertMessage v-if="error" variant="error" :message="error" />
       <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-gray-200 p-4">
+        <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Dades de l'empresa</legend>
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">

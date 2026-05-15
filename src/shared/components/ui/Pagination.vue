@@ -11,8 +11,8 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3">
-    <p class="text-sm text-gray-700">
+  <div class="flex items-center justify-between border-t border-neutral-200 px-4 py-3">
+    <p class="text-sm text-neutral-700">
       Total: <span class="font-medium">{{ total }}</span>
     </p>
     <div class="flex gap-2">

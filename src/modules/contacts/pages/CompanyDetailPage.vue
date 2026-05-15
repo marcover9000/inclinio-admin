@@ -125,7 +125,7 @@ onMounted(load);
   <AppShell>
     <div class="space-y-4 p-6" v-if="errorMsg && !company">
       <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/companies" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
+      <RouterLink to="/companies" class="text-sm text-brand-600 hover:underline">← Tornar al llistat</RouterLink>
     </div>
     <div class="space-y-4 p-6" v-if="company">
       <div class="flex items-center justify-between">
@@ -143,70 +143,70 @@ onMounted(load);
         </div>
         <div class="col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
-          <button type="button" @click="showDelete = true" class="rounded border border-red-300 bg-white px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">Eliminar</button>
+          <button type="button" @click="showDelete = true" class="rounded border border-danger-300 bg-white px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 hover:border-danger-400 focus:outline-none focus:ring-2 focus:ring-danger-200">Eliminar</button>
         </div>
       </form>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <header class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-medium">Persones ({{ company.people?.length ?? 0 }})</h2>
-          <button v-if="!showAddPerson" type="button" @click="showAddPerson = true" class="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">
+          <button v-if="!showAddPerson" type="button" @click="showAddPerson = true" class="rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700">
             + Afegir persona
           </button>
         </header>
 
-        <div v-if="showAddPerson" class="mb-4 rounded border border-blue-200 bg-blue-50 p-3">
+        <div v-if="showAddPerson" class="mb-4 rounded border border-brand-200 bg-brand-50 p-3">
           <div class="flex items-center justify-between mb-2">
             <p class="text-sm font-medium">Afegir persona existent</p>
-            <button type="button" @click="cancelAddPerson" class="text-xs text-gray-600 hover:underline">Cancel·lar</button>
+            <button type="button" @click="cancelAddPerson" class="text-xs text-neutral-600 hover:underline">Cancel·lar</button>
           </div>
           <div class="relative">
             <input
               v-model="personSearchQuery"
               @input="searchPersons"
               placeholder="Cerca per nom o email…"
-              class="w-full rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+              class="w-full rounded border-neutral-300 focus:ring-2 focus:ring-brand-500"
             />
             <ul v-if="personSuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow max-h-60 overflow-auto">
-              <li v-for="p in personSuggestions" :key="p.id" @click="attachPerson(p)" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
-                {{ p.full_name }}<span v-if="p.email" class="ml-2 text-xs text-gray-500">{{ p.email }}</span>
-                <span v-if="p.company" class="ml-2 text-xs text-orange-600">(actualment a {{ p.company.name }})</span>
+              <li v-for="p in personSuggestions" :key="p.id" @click="attachPerson(p)" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
+                {{ p.full_name }}<span v-if="p.email" class="ml-2 text-xs text-neutral-500">{{ p.email }}</span>
+                <span v-if="p.company" class="ml-2 text-xs text-accent-600">(actualment a {{ p.company.name }})</span>
               </li>
             </ul>
-            <p v-if="personSearchQuery && personSuggestions.length === 0 && !searchingPersons" class="mt-2 text-xs text-gray-500">
-              No s'ha trobat cap persona. <RouterLink :to="`/people/new?companyId=${company.id}`" class="text-blue-600 hover:underline">Crear nova</RouterLink>
+            <p v-if="personSearchQuery && personSuggestions.length === 0 && !searchingPersons" class="mt-2 text-xs text-neutral-500">
+              No s'ha trobat cap persona. <RouterLink :to="`/people/new?companyId=${company.id}`" class="text-brand-600 hover:underline">Crear nova</RouterLink>
             </p>
           </div>
         </div>
 
-        <p v-if="!company.people?.length" class="text-sm text-gray-500">Aquesta empresa encara no té persones associades.</p>
+        <p v-if="!company.people?.length" class="text-sm text-neutral-500">Aquesta empresa encara no té persones associades.</p>
         <div v-else class="space-y-2">
-          <div v-for="p in company.people" :key="p.id" class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50">
+          <div v-for="p in company.people" :key="p.id" class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50">
             <RouterLink :to="`/people/${p.id}`" class="flex-1">
               <p class="text-sm font-medium">{{ p.full_name }}</p>
-              <p v-if="p.email" class="text-xs text-gray-500">{{ p.email }}</p>
+              <p v-if="p.email" class="text-xs text-neutral-500">{{ p.email }}</p>
             </RouterLink>
             <div class="flex items-center gap-3">
               <ClientBadge v-if="p.is_client" :since="p.became_client_at" />
-              <button type="button" @click="detachPerson(p)" class="text-xs text-red-600 hover:underline">Desvincular</button>
+              <button type="button" @click="detachPerson(p)" class="text-xs text-danger-600 hover:underline">Desvincular</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <h2 class="mb-3 text-lg font-medium">Leads ({{ company.leads?.length ?? 0 }})</h2>
-        <p v-if="!company.leads?.length" class="text-sm text-gray-500">Aquesta empresa encara no té cap lead.</p>
+        <p v-if="!company.leads?.length" class="text-sm text-neutral-500">Aquesta empresa encara no té cap lead.</p>
         <div v-else class="space-y-2">
           <RouterLink
             v-for="lead in company.leads"
             :key="lead.id"
             :to="`/leads/${lead.id}`"
-            class="flex items-center justify-between rounded border border-gray-200 p-3 hover:bg-gray-50"
+            class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50"
           >
             <div>
               <p class="text-sm font-medium">{{ lead.message?.slice(0, 80) ?? '(sense missatge)' }}<span v-if="lead.message && lead.message.length > 80">…</span></p>
-              <p class="text-xs text-gray-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }}</p>
+              <p class="text-xs text-neutral-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }}</p>
             </div>
             <LeadStatusBadge :status="lead.status" />
           </RouterLink>

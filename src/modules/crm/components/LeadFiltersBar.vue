@@ -22,7 +22,7 @@ const allStatuses: LeadStatus[] = ['new', 'contacted', 'qualified', 'proposal', 
   <div class="flex flex-wrap items-center gap-4">
     <TextField :model-value="search" @update:model-value="$emit('update:search', $event)" label="Cerca" placeholder="Nom o email…" />
     <div>
-      <p class="text-sm font-medium text-gray-700">Estats</p>
+      <p class="text-sm font-medium text-neutral-700">Estats</p>
       <div class="flex gap-1 flex-wrap">
         <label v-for="s in allStatuses" :key="s" class="flex items-center gap-1 text-xs">
           <input

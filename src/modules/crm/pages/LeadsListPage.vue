@@ -52,7 +52,7 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
     <div class="space-y-4 p-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">Leads</h1>
-        <RouterLink to="/leads/new" class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">+ Nou Lead</RouterLink>
+        <RouterLink to="/leads/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nou Lead</RouterLink>
       </div>
       <LeadFiltersBar
         v-model:search="search"
@@ -72,17 +72,17 @@ watch([search, selectedStatuses, selectedTags, page], load, { deep: true });
         ]"
       >
         <template #cell-name="{ row }">
-          <RouterLink :to="`/leads/${row.id}`" class="text-blue-600 hover:underline">
+          <RouterLink :to="`/leads/${row.id}`" class="text-brand-600 hover:underline">
             {{ row.person?.full_name ?? '(persona eliminada)' }}<span v-if="row.company"> · {{ row.company.name }}</span>
           </RouterLink>
         </template>
         <template #cell-subject="{ row }">
           <div class="max-w-md">
-            <p class="truncate text-sm text-gray-700" :title="row.message ?? ''">
+            <p class="truncate text-sm text-neutral-700" :title="row.message ?? ''">
               {{ row.message?.trim() ? row.message.slice(0, 80) + (row.message.length > 80 ? '…' : '') : '—' }}
             </p>
             <div v-if="row.tags.length" class="mt-1 flex flex-wrap gap-1">
-              <span v-for="tag in row.tags" :key="tag" class="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{{ tag }}</span>
+              <span v-for="tag in row.tags" :key="tag" class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600">{{ tag }}</span>
             </div>
           </div>
         </template>

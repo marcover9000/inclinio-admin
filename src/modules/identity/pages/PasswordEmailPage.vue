@@ -39,18 +39,18 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+  <div class="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
     <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6">
       <div class="text-center space-y-1">
-        <h1 class="text-2xl font-semibold text-slate-800">Inclinio v2</h1>
-        <p class="text-sm text-slate-500">Recupera la contrasenya</p>
+        <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
+        <p class="text-sm text-neutral-500">Recupera la contrasenya</p>
       </div>
 
       <AlertMessage v-if="globalError" variant="error" :message="globalError" />
       <AlertMessage v-if="successMessage" variant="success" :message="successMessage" />
 
       <form v-if="!successMessage" class="space-y-4" @submit.prevent="handleSubmit">
-        <p class="text-sm text-slate-600">
+        <p class="text-sm text-neutral-600">
           Introdueix el teu correu electrònic. Si està registrat, t'enviarem un enllaç per restablir la contrasenya.
         </p>
         <TextField
@@ -65,7 +65,7 @@ async function handleSubmit() {
       </form>
 
       <div class="text-center text-sm">
-        <RouterLink to="/login" class="text-slate-600 hover:text-slate-800 underline">
+        <RouterLink to="/login" class="text-neutral-600 hover:text-neutral-800 underline">
           Tornar al login
         </RouterLink>
       </div>

@@ -88,7 +88,7 @@ async function submit() {
       <h1 class="text-2xl font-semibold">Nova persona</h1>
       <AlertMessage v-if="error" variant="error" :message="error" />
       <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-gray-200 p-4">
+        <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Dades de la persona</legend>
           <div class="grid grid-cols-2 gap-4">
             <TextField v-model="form.first_name" label="Nom *" />
@@ -99,7 +99,7 @@ async function submit() {
           </div>
         </fieldset>
 
-        <fieldset class="rounded border border-gray-200 p-4">
+        <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Empresa (opcional)</legend>
           <div class="relative">
             <TextField
@@ -109,13 +109,13 @@ async function submit() {
               :disabled="form.company_id !== null"
             />
             <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
-                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-green-600">(client)</span>
+              <li v-for="c in companySuggestions" :key="c.id" @click="pickCompany(c)" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
+                {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
               </li>
             </ul>
-            <p v-if="form.company_id" class="mt-2 text-xs text-gray-600">
+            <p v-if="form.company_id" class="mt-2 text-xs text-neutral-600">
               Empresa seleccionada.
-              <button type="button" @click="clearCompany" class="text-blue-600 hover:underline">Esborrar</button>
+              <button type="button" @click="clearCompany" class="text-brand-600 hover:underline">Esborrar</button>
             </p>
           </div>
         </fieldset>

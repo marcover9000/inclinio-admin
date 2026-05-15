@@ -43,7 +43,7 @@ watch([search, onlyClients, page], load);
     <div class="space-y-4 p-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">Persones</h1>
-        <RouterLink to="/people/new" class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">+ Nova persona</RouterLink>
+        <RouterLink to="/people/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nova persona</RouterLink>
       </div>
       <div class="flex gap-4">
         <TextField v-model="search" label="Cerca" placeholder="Nom o email…" />
@@ -63,7 +63,7 @@ watch([search, onlyClients, page], load);
         ]"
       >
         <template #cell-full_name="{ row }">
-          <RouterLink :to="`/people/${row.id}`" class="text-blue-600 hover:underline">{{ row.full_name }}</RouterLink>
+          <RouterLink :to="`/people/${row.id}`" class="text-brand-600 hover:underline">{{ row.full_name }}</RouterLink>
         </template>
         <template #cell-company="{ row }">{{ row.company?.name ?? '—' }}</template>
         <template #cell-is_client="{ row }">

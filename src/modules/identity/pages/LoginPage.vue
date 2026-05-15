@@ -55,11 +55,11 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+  <div class="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
     <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6">
       <div class="text-center space-y-1">
-        <h1 class="text-2xl font-semibold text-slate-800">Inclinio v2</h1>
-        <p class="text-sm text-slate-500">Inicia sessió</p>
+        <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
+        <p class="text-sm text-neutral-500">Inicia sessió</p>
       </div>
 
       <AlertMessage v-if="globalError" variant="error" :message="globalError" />
@@ -85,15 +85,15 @@ async function handleSubmit() {
           required
           :error="errors.password"
         />
-        <label class="flex items-center gap-2 text-sm text-slate-600">
-          <input v-model="form.remember" type="checkbox" class="rounded border-slate-300" />
+        <label class="flex items-center gap-2 text-sm text-neutral-600">
+          <input v-model="form.remember" type="checkbox" class="rounded border-neutral-300" />
           Recorda'm
         </label>
         <SubmitButton :loading="loading" label="Entra" :block="true" />
       </form>
 
       <div class="text-center text-sm">
-        <RouterLink to="/password/email" class="text-slate-600 hover:text-slate-800 underline">
+        <RouterLink to="/password/email" class="text-neutral-600 hover:text-neutral-800 underline">
           He oblidat la contrasenya
         </RouterLink>
       </div>

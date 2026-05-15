@@ -63,17 +63,17 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+  <div class="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
     <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6">
       <div class="text-center space-y-1">
-        <h1 class="text-2xl font-semibold text-slate-800">Inclinio v2</h1>
-        <p class="text-sm text-slate-500">Estableix una nova contrasenya</p>
+        <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
+        <p class="text-sm text-neutral-500">Estableix una nova contrasenya</p>
       </div>
 
       <AlertMessage v-if="globalError" variant="error" :message="globalError" />
 
       <form class="space-y-4" @submit.prevent="handleSubmit">
-        <p class="text-sm text-slate-600">
+        <p class="text-sm text-neutral-600">
           Restablint contrasenya per a <strong>{{ email }}</strong>.
         </p>
         <PasswordField

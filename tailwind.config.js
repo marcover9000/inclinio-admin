@@ -16,13 +16,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: token('brand', [50, 100, 200, 500, 600, 700, 800]),
+        brand: token('brand', [50, 100, 200, 500, 600, 700, 800, 900]),
         neutral: token('neutral', [50, 100, 200, 300, 500, 600, 700, 800]),
         success: token('success', [50, 100, 200, 600, 800]),
         warning: token('warning', [100, 800]),
         danger: token('danger', [50, 200, 300, 400, 500, 600, 700, 800]),
         info: token('info', [100, 800]),
-        accent: token('accent', [100, 800]),
+        accent: token('accent', [100, 600, 800]),
       },
     },
   },

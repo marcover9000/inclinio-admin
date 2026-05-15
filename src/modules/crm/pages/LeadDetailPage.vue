@@ -79,13 +79,13 @@ onMounted(load);
   <AppShell>
     <div class="space-y-4 p-6" v-if="errorMsg && !lead">
       <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/leads" class="text-sm text-blue-600 hover:underline">← Tornar al llistat</RouterLink>
+      <RouterLink to="/leads" class="text-sm text-brand-600 hover:underline">← Tornar al llistat</RouterLink>
     </div>
     <div class="space-y-6 p-6" v-if="lead">
       <header class="flex items-start justify-between">
         <div>
           <h1 class="text-2xl font-semibold">{{ lead.person?.full_name ?? '(persona eliminada)' }}</h1>
-          <p v-if="lead.company" class="text-sm text-gray-500">{{ lead.company.name }}</p>
+          <p v-if="lead.company" class="text-sm text-neutral-500">{{ lead.company.name }}</p>
         </div>
         <div class="flex items-center gap-3">
           <LeadStatusBadge :status="lead.status" />
@@ -93,24 +93,24 @@ onMounted(load);
         </div>
       </header>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <h2 class="mb-2 text-lg font-medium">Missatge inicial</h2>
-        <p class="whitespace-pre-wrap text-sm text-gray-700">{{ lead.message || '—' }}</p>
-        <p class="mt-3 text-xs text-gray-500">Origen: {{ lead.source }}</p>
+        <p class="whitespace-pre-wrap text-sm text-neutral-700">{{ lead.message || '—' }}</p>
+        <p class="mt-3 text-xs text-neutral-500">Origen: {{ lead.source }}</p>
       </section>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <h2 class="mb-2 text-lg font-medium">Tags</h2>
         <input
           :value="lead.tags.join(', ')"
           @change="lead.tags = (($event.target as HTMLInputElement).value).split(',').map(t => t.trim()).filter(Boolean)"
-          class="w-full rounded border-gray-300"
+          class="w-full rounded border-neutral-300"
           placeholder="web, seo, …"
         />
         <SubmitButton class="mt-2" @click="saveLead">Desar canvis</SubmitButton>
       </section>
 
-      <section class="rounded border border-gray-200 p-4">
+      <section class="rounded border border-neutral-200 p-4">
         <h2 class="mb-3 text-lg font-medium">Notes ({{ lead.notes?.length ?? 0 }})</h2>
         <LeadNoteForm @submit="onAddNote" />
         <hr class="my-3" />
@@ -118,7 +118,7 @@ onMounted(load);
       </section>
 
       <div class="flex justify-end">
-        <button type="button" @click="showDelete = true" class="rounded border border-red-300 bg-white px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">Eliminar Lead</button>
+        <button type="button" @click="showDelete = true" class="rounded border border-danger-300 bg-white px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 hover:border-danger-400 focus:outline-none focus:ring-2 focus:ring-danger-200">Eliminar Lead</button>
       </div>
 
       <ConfirmDialog

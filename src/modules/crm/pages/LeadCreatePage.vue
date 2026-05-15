@@ -136,11 +136,11 @@ onMounted(async () => {
       <h1 class="text-2xl font-semibold">Nou Lead</h1>
       <AlertMessage v-if="error" variant="error" :message="error" />
       <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-gray-200 p-4">
+        <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Persona</legend>
-          <div v-if="form.person.useExisting" class="mb-3 flex items-center justify-between rounded bg-blue-50 px-3 py-2 text-sm text-blue-800">
+          <div v-if="form.person.useExisting" class="mb-3 flex items-center justify-between rounded bg-brand-50 px-3 py-2 text-sm text-brand-800">
             <span>Aquesta persona ja existeix al CRM.</span>
-            <button type="button" @click="clearPersonSelection" class="text-xs text-blue-700 underline hover:text-blue-900">Esborrar selecció</button>
+            <button type="button" @click="clearPersonSelection" class="text-xs text-brand-700 underline hover:text-brand-900">Esborrar selecció</button>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="relative">
@@ -155,10 +155,10 @@ onMounted(async () => {
                   v-for="p in personSuggestions"
                   :key="p.id"
                   @click="pickPerson(p)"
-                  class="cursor-pointer p-2 text-sm hover:bg-gray-100"
+                  class="cursor-pointer p-2 text-sm hover:bg-neutral-100"
                 >
                   <div class="font-medium">{{ p.full_name }}</div>
-                  <div class="text-xs text-gray-500">
+                  <div class="text-xs text-neutral-500">
                     <span v-if="p.email">{{ p.email }}</span>
                     <span v-if="p.company"> · {{ p.company.name }}</span>
                   </div>
@@ -179,12 +179,12 @@ onMounted(async () => {
           </div>
         </fieldset>
 
-        <fieldset v-if="form.person.useExisting && pickedPersonCompany" class="rounded border border-gray-200 p-4">
+        <fieldset v-if="form.person.useExisting && pickedPersonCompany" class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Empresa</legend>
-          <p class="text-sm text-gray-600">Empresa de la persona: <strong>{{ pickedPersonCompany.name }}</strong></p>
+          <p class="text-sm text-neutral-600">Empresa de la persona: <strong>{{ pickedPersonCompany.name }}</strong></p>
         </fieldset>
 
-        <fieldset v-if="!form.person.useExisting" class="rounded border border-gray-200 p-4">
+        <fieldset v-if="!form.person.useExisting" class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Empresa</legend>
           <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" v-model="form.hasCompany" /> Aquest lead està lligat a una empresa
@@ -193,8 +193,8 @@ onMounted(async () => {
             <div class="col-span-2 relative">
               <TextField v-model="form.company.name" label="Nom de l'empresa *" @input="searchCompanies" />
               <ul v-if="companySuggestions.length" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-                <li v-for="c in companySuggestions" :key="c.id" @click="form.company.name = c.name; companySuggestions = []" class="cursor-pointer p-2 text-sm hover:bg-gray-100">
-                  {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-green-600">(client)</span>
+                <li v-for="c in companySuggestions" :key="c.id" @click="form.company.name = c.name; companySuggestions = []" class="cursor-pointer p-2 text-sm hover:bg-neutral-100">
+                  {{ c.name }}<span v-if="c.is_client" class="ml-2 text-xs text-success-600">(client)</span>
                 </li>
               </ul>
             </div>
@@ -204,7 +204,7 @@ onMounted(async () => {
           </div>
         </fieldset>
 
-        <fieldset class="rounded border border-gray-200 p-4">
+        <fieldset class="rounded border border-neutral-200 p-4">
           <legend class="px-2 text-sm font-medium">Lead</legend>
           <TextareaField v-model="form.message" label="Missatge *" :rows="6" />
           <TextField v-model="form.tagsRaw" label="Tags (separats per coma)" placeholder="web, seo, branding" class="mt-4" />
