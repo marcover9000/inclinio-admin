@@ -81,7 +81,7 @@ onMounted(load);
 <template>
   <AppShell>
     <NotFoundFallback v-if="errorMsg && !person" :message="errorMsg" back-to="/people" back-label="Tornar al llistat" />
-    <div class="space-y-4 p-6" v-if="person">
+    <template v-if="person">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">{{ person.full_name }}</h1>
         <ClientBadge v-if="person.is_client" :since="person.became_client_at" />
@@ -131,6 +131,6 @@ onMounted(load);
         @confirm="destroy"
         @cancel="showDelete = false"
       />
-    </div>
+    </template>
   </AppShell>
 </template>

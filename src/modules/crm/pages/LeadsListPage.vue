@@ -40,53 +40,51 @@ const { data, loading, errorMsg, page } = usePaginatedResource<Lead>({
 
 <template>
   <AppShell>
-    <div class="space-y-4 p-6">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Leads</h1>
-        <RouterLink to="/leads/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nou Lead</RouterLink>
-      </div>
-      <LeadFiltersBar
-        v-model:search="search"
-        v-model:selectedStatuses="selectedStatuses"
-        v-model:selectedTags="selectedTags"
-        :available-tags="[]"
-      />
-      <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
-      <DataTable
-        :rows="data?.data ?? []"
-        :loading="loading"
-        :columns="[
-          { key: 'name', label: 'Nom + Empresa' },
-          { key: 'subject', label: 'Assumpte' },
-          { key: 'status', label: 'Estat' },
-          { key: 'created_at', label: 'Creat' },
-        ]"
-      >
-        <template #cell-name="{ row }">
-          <RouterLink :to="`/leads/${row.id}`" class="text-brand-600 hover:underline">
-            {{ row.person?.full_name ?? '(persona eliminada)' }}<span v-if="row.company"> · {{ row.company.name }}</span>
-          </RouterLink>
-        </template>
-        <template #cell-subject="{ row }">
-          <div class="max-w-md">
-            <p class="truncate text-sm text-neutral-700" :title="row.message ?? ''">
-              {{ row.message?.trim() ? row.message.slice(0, 80) + (row.message.length > 80 ? '…' : '') : '—' }}
-            </p>
-            <div v-if="row.tags.length" class="mt-1 flex flex-wrap gap-1">
-              <span v-for="tag in row.tags" :key="tag" class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600">{{ tag }}</span>
-            </div>
-          </div>
-        </template>
-        <template #cell-status="{ row }"><LeadStatusBadge :status="row.status" /></template>
-        <template #cell-created_at="{ row }">{{ formatDate(row.created_at) }}</template>
-      </DataTable>
-      <Pagination
-        v-if="data"
-        :current-page="data.meta.current_page"
-        :last-page="data.meta.last_page"
-        :total="data.meta.total"
-        @change="(p) => (page = p)"
-      />
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold">Leads</h1>
+      <RouterLink to="/leads/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nou Lead</RouterLink>
     </div>
+    <LeadFiltersBar
+      v-model:search="search"
+      v-model:selectedStatuses="selectedStatuses"
+      v-model:selectedTags="selectedTags"
+      :available-tags="[]"
+    />
+    <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
+    <DataTable
+      :rows="data?.data ?? []"
+      :loading="loading"
+      :columns="[
+        { key: 'name', label: 'Nom + Empresa' },
+        { key: 'subject', label: 'Assumpte' },
+        { key: 'status', label: 'Estat' },
+        { key: 'created_at', label: 'Creat' },
+      ]"
+    >
+      <template #cell-name="{ row }">
+        <RouterLink :to="`/leads/${row.id}`" class="text-brand-600 hover:underline">
+          {{ row.person?.full_name ?? '(persona eliminada)' }}<span v-if="row.company"> · {{ row.company.name }}</span>
+        </RouterLink>
+      </template>
+      <template #cell-subject="{ row }">
+        <div class="max-w-md">
+          <p class="truncate text-sm text-neutral-700" :title="row.message ?? ''">
+            {{ row.message?.trim() ? row.message.slice(0, 80) + (row.message.length > 80 ? '…' : '') : '—' }}
+          </p>
+          <div v-if="row.tags.length" class="mt-1 flex flex-wrap gap-1">
+            <span v-for="tag in row.tags" :key="tag" class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600">{{ tag }}</span>
+          </div>
+        </div>
+      </template>
+      <template #cell-status="{ row }"><LeadStatusBadge :status="row.status" /></template>
+      <template #cell-created_at="{ row }">{{ formatDate(row.created_at) }}</template>
+    </DataTable>
+    <Pagination
+      v-if="data"
+      :current-page="data.meta.current_page"
+      :last-page="data.meta.last_page"
+      :total="data.meta.total"
+      @change="(p) => (page = p)"
+    />
   </AppShell>
 </template>

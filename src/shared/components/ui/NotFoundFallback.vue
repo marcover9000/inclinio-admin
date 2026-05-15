@@ -15,7 +15,8 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <div class="space-y-4 p-6">
+  <!-- El padding ve d'AppShell; aquí només l'espaiat intern. -->
+  <div class="space-y-4">
     <AlertMessage variant="error" :message="message" />
     <RouterLink :to="backTo" class="text-sm text-brand-600 hover:underline">← {{ backLabel }}</RouterLink>
   </div>

@@ -41,7 +41,8 @@ async function handleLogout() {
         </div>
       </div>
     </header>
-    <main class="flex-1 max-w-7xl mx-auto w-full p-4">
+    <!-- Padding i espaiat centralitzats: les pàgines no els repeteixen. -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
       <slot />
     </main>
   </div>

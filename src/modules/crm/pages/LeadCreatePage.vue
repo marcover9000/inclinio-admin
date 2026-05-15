@@ -125,85 +125,83 @@ onMounted(async () => {
 
 <template>
   <AppShell>
-    <div class="space-y-6 p-6">
-      <h1 class="text-2xl font-semibold">Nou Lead</h1>
-      <AlertMessage v-if="error" variant="error" :message="error" />
-      <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Persona</legend>
-          <div v-if="form.person.useExisting" class="mb-3 flex items-center justify-between rounded bg-brand-50 px-3 py-2 text-sm text-brand-800">
-            <span>Aquesta persona ja existeix al CRM.</span>
-            <button type="button" @click="clearPersonSelection" class="text-xs text-brand-700 underline hover:text-brand-900">Esborrar selecció</button>
+    <h1 class="text-2xl font-semibold">Nou Lead</h1>
+    <AlertMessage v-if="error" variant="error" :message="error" />
+    <form @submit.prevent="submit" class="space-y-6">
+      <fieldset class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Persona</legend>
+        <div v-if="form.person.useExisting" class="mb-3 flex items-center justify-between rounded bg-brand-50 px-3 py-2 text-sm text-brand-800">
+          <span>Aquesta persona ja existeix al CRM.</span>
+          <button type="button" @click="clearPersonSelection" class="text-xs text-brand-700 underline hover:text-brand-900">Esborrar selecció</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="relative">
+            <TextField
+              v-model="form.person.first_name"
+              label="Nom *"
+              :disabled="form.person.useExisting"
+              @input="searchPeople"
+            />
+            <ul v-if="personSuggestions.length && !form.person.useExisting" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
+              <li
+                v-for="p in personSuggestions"
+                :key="p.id"
+                @click="pickPerson(p)"
+                class="cursor-pointer p-2 text-sm hover:bg-neutral-100"
+              >
+                <div class="font-medium">{{ p.full_name }}</div>
+                <div class="text-xs text-neutral-500">
+                  <span v-if="p.email">{{ p.email }}</span>
+                  <span v-if="p.company"> · {{ p.company.name }}</span>
+                </div>
+              </li>
+            </ul>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="relative">
-              <TextField
-                v-model="form.person.first_name"
-                label="Nom *"
-                :disabled="form.person.useExisting"
-                @input="searchPeople"
-              />
-              <ul v-if="personSuggestions.length && !form.person.useExisting" class="absolute z-10 mt-1 w-full rounded border bg-white shadow">
-                <li
-                  v-for="p in personSuggestions"
-                  :key="p.id"
-                  @click="pickPerson(p)"
-                  class="cursor-pointer p-2 text-sm hover:bg-neutral-100"
-                >
-                  <div class="font-medium">{{ p.full_name }}</div>
-                  <div class="text-xs text-neutral-500">
-                    <span v-if="p.email">{{ p.email }}</span>
-                    <span v-if="p.company"> · {{ p.company.name }}</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <TextField v-model="form.person.last_name" label="Cognoms" :disabled="form.person.useExisting" />
-            <div class="relative">
-              <TextField
-                v-model="form.person.email"
-                label="Email"
-                :disabled="form.person.useExisting"
-                @input="searchPeople"
-              />
-            </div>
-            <TextField v-model="form.person.phone" label="Telèfon" :disabled="form.person.useExisting" />
-            <TextField v-model="form.person.position" label="Càrrec" :disabled="form.person.useExisting" />
+          <TextField v-model="form.person.last_name" label="Cognoms" :disabled="form.person.useExisting" />
+          <div class="relative">
+            <TextField
+              v-model="form.person.email"
+              label="Email"
+              :disabled="form.person.useExisting"
+              @input="searchPeople"
+            />
           </div>
-        </fieldset>
+          <TextField v-model="form.person.phone" label="Telèfon" :disabled="form.person.useExisting" />
+          <TextField v-model="form.person.position" label="Càrrec" :disabled="form.person.useExisting" />
+        </div>
+      </fieldset>
 
-        <fieldset v-if="form.person.useExisting && pickedPersonCompany" class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Empresa</legend>
-          <p class="text-sm text-neutral-600">Empresa de la persona: <strong>{{ pickedPersonCompany.name }}</strong></p>
-        </fieldset>
+      <fieldset v-if="form.person.useExisting && pickedPersonCompany" class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Empresa</legend>
+        <p class="text-sm text-neutral-600">Empresa de la persona: <strong>{{ pickedPersonCompany.name }}</strong></p>
+      </fieldset>
 
-        <fieldset v-if="!form.person.useExisting" class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Empresa</legend>
-          <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" v-model="form.hasCompany" /> Aquest lead està lligat a una empresa
-          </label>
-          <div v-if="form.hasCompany" class="mt-4 grid grid-cols-2 gap-4">
-            <div class="col-span-2 relative">
-              <CompanyPicker
-                v-model="pickedCompanyId"
-                v-model:name="form.company.name"
-                label="Nom de l'empresa *"
-              />
-            </div>
-            <TextField v-model="form.company.vat" label="VAT/CIF" />
-            <TextField v-model="form.company.website" label="Web" />
-            <TextField v-model="form.company.address" label="Adreça" />
+      <fieldset v-if="!form.person.useExisting" class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Empresa</legend>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" v-model="form.hasCompany" /> Aquest lead està lligat a una empresa
+        </label>
+        <div v-if="form.hasCompany" class="mt-4 grid grid-cols-2 gap-4">
+          <div class="col-span-2 relative">
+            <CompanyPicker
+              v-model="pickedCompanyId"
+              v-model:name="form.company.name"
+              label="Nom de l'empresa *"
+            />
           </div>
-        </fieldset>
+          <TextField v-model="form.company.vat" label="VAT/CIF" />
+          <TextField v-model="form.company.website" label="Web" />
+          <TextField v-model="form.company.address" label="Adreça" />
+        </div>
+      </fieldset>
 
-        <fieldset class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Lead</legend>
-          <TextareaField v-model="form.message" label="Missatge *" :rows="6" />
-          <TextField v-model="form.tagsRaw" label="Tags (separats per coma)" placeholder="web, seo, branding" class="mt-4" />
-        </fieldset>
+      <fieldset class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Lead</legend>
+        <TextareaField v-model="form.message" label="Missatge *" :rows="6" />
+        <TextField v-model="form.tagsRaw" label="Tags (separats per coma)" placeholder="web, seo, branding" class="mt-4" />
+      </fieldset>
 
-        <SubmitButton :loading="loading" :block="true">Crear Lead</SubmitButton>
-      </form>
-    </div>
+      <SubmitButton :loading="loading" :block="true">Crear Lead</SubmitButton>
+    </form>
   </AppShell>
 </template>

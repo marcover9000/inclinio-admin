@@ -97,7 +97,7 @@ onMounted(load);
 <template>
   <AppShell>
     <NotFoundFallback v-if="errorMsg && !lead" :message="errorMsg" back-to="/leads" back-label="Tornar al llistat" />
-    <div class="space-y-6 p-6" v-if="lead">
+    <template v-if="lead">
       <header class="flex items-start justify-between">
         <div>
           <h1 class="text-2xl font-semibold">{{ lead.person?.full_name ?? '(persona eliminada)' }}</h1>
@@ -163,6 +163,6 @@ onMounted(load);
         @confirm="destroy"
         @cancel="showDelete = false"
       />
-    </div>
+    </template>
   </AppShell>
 </template>

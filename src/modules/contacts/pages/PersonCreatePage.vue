@@ -67,39 +67,37 @@ async function submit() {
 
 <template>
   <AppShell>
-    <div class="space-y-6 p-6">
-      <h1 class="text-2xl font-semibold">Nova persona</h1>
-      <AlertMessage v-if="error" variant="error" :message="error" />
-      <form @submit.prevent="submit" class="space-y-6">
-        <fieldset class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Dades de la persona</legend>
-          <div class="grid grid-cols-2 gap-4">
-            <TextField v-model="form.first_name" label="Nom *" />
-            <TextField v-model="form.last_name" label="Cognoms" />
-            <TextField v-model="form.email" label="Email" />
-            <TextField v-model="form.phone" label="Telèfon" />
-            <TextField v-model="form.position" label="Càrrec" />
-          </div>
-        </fieldset>
+    <h1 class="text-2xl font-semibold">Nova persona</h1>
+    <AlertMessage v-if="error" variant="error" :message="error" />
+    <form @submit.prevent="submit" class="space-y-6">
+      <fieldset class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Dades de la persona</legend>
+        <div class="grid grid-cols-2 gap-4">
+          <TextField v-model="form.first_name" label="Nom *" />
+          <TextField v-model="form.last_name" label="Cognoms" />
+          <TextField v-model="form.email" label="Email" />
+          <TextField v-model="form.phone" label="Telèfon" />
+          <TextField v-model="form.position" label="Càrrec" />
+        </div>
+      </fieldset>
 
-        <fieldset class="rounded border border-neutral-200 p-4">
-          <legend class="px-2 text-sm font-medium">Empresa (opcional)</legend>
-          <div class="relative">
-            <CompanyPicker
-              v-model="form.company_id"
-              v-model:name="form.companyName"
-              label="Nom de l'empresa"
-              :disabled="form.company_id !== null"
-            />
-            <p v-if="form.company_id" class="mt-2 text-xs text-neutral-600">
-              Empresa seleccionada.
-              <button type="button" @click="clearCompany" class="text-brand-600 hover:underline">Esborrar</button>
-            </p>
-          </div>
-        </fieldset>
+      <fieldset class="rounded border border-neutral-200 p-4">
+        <legend class="px-2 text-sm font-medium">Empresa (opcional)</legend>
+        <div class="relative">
+          <CompanyPicker
+            v-model="form.company_id"
+            v-model:name="form.companyName"
+            label="Nom de l'empresa"
+            :disabled="form.company_id !== null"
+          />
+          <p v-if="form.company_id" class="mt-2 text-xs text-neutral-600">
+            Empresa seleccionada.
+            <button type="button" @click="clearCompany" class="text-brand-600 hover:underline">Esborrar</button>
+          </p>
+        </div>
+      </fieldset>
 
-        <SubmitButton :loading="loading" :block="true">Crear persona</SubmitButton>
-      </form>
-    </div>
+      <SubmitButton :loading="loading" :block="true">Crear persona</SubmitButton>
+    </form>
   </AppShell>
 </template>
