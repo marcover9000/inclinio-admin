@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useRoute, useRouter, RouterLink } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getLead, updateLead, deleteLead, transitionLeadStatus } from '../api/leads';
 import { addLeadNote, deleteLeadNote } from '../api/leadNotes';
 import type { Lead, LeadStatus } from '../types';
 import AppShell from '@/shared/components/AppShell.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
-import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import DangerButton from '@/shared/components/ui/DangerButton.vue';
+import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadStatusSelector from '../components/LeadStatusSelector.vue';
 import LeadNoteList from '../components/LeadNoteList.vue';
@@ -77,10 +78,7 @@ onMounted(load);
 
 <template>
   <AppShell>
-    <div class="space-y-4 p-6" v-if="errorMsg && !lead">
-      <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/leads" class="text-sm text-brand-600 hover:underline">← Tornar al llistat</RouterLink>
-    </div>
+    <NotFoundFallback v-if="errorMsg && !lead" :message="errorMsg" back-to="/leads" back-label="Tornar al llistat" />
     <div class="space-y-6 p-6" v-if="lead">
       <header class="flex items-start justify-between">
         <div>
@@ -118,7 +116,7 @@ onMounted(load);
       </section>
 
       <div class="flex justify-end">
-        <button type="button" @click="showDelete = true" class="rounded border border-danger-300 bg-white px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 hover:border-danger-400 focus:outline-none focus:ring-2 focus:ring-danger-200">Eliminar Lead</button>
+        <DangerButton @click="showDelete = true">Eliminar Lead</DangerButton>
       </div>
 
       <ConfirmDialog

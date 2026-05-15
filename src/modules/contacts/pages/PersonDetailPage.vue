@@ -10,8 +10,10 @@ import TextField from '@/shared/components/form/TextField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import DangerButton from '@/shared/components/ui/DangerButton.vue';
+import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import ClientBadge from '../components/ClientBadge.vue';
-import LeadStatusBadge from '@/modules/crm/components/LeadStatusBadge.vue';
+import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
 
 type PersonWithLeads = Person & { leads?: Lead[] };
 
@@ -102,10 +104,7 @@ onMounted(load);
 
 <template>
   <AppShell>
-    <div class="space-y-4 p-6" v-if="errorMsg && !person">
-      <AlertMessage variant="error" :message="errorMsg" />
-      <RouterLink to="/people" class="text-sm text-brand-600 hover:underline">← Tornar al llistat</RouterLink>
-    </div>
+    <NotFoundFallback v-if="errorMsg && !person" :message="errorMsg" back-to="/people" back-label="Tornar al llistat" />
     <div class="space-y-4 p-6" v-if="person">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold">{{ person.full_name }}</h1>
@@ -140,7 +139,7 @@ onMounted(load);
         </div>
         <div class="col-span-2 flex items-center gap-3">
           <SubmitButton :loading="loading">Desar canvis</SubmitButton>
-          <button type="button" @click="showDelete = true" class="rounded border border-danger-300 bg-white px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 hover:border-danger-400 focus:outline-none focus:ring-2 focus:ring-danger-200">Eliminar</button>
+          <DangerButton @click="showDelete = true">Eliminar</DangerButton>
         </div>
       </form>
 
@@ -151,18 +150,7 @@ onMounted(load);
         </header>
         <p v-if="!person.leads?.length" class="text-sm text-neutral-500">Aquesta persona encara no té cap lead.</p>
         <div v-else class="space-y-2">
-          <RouterLink
-            v-for="lead in person.leads"
-            :key="lead.id"
-            :to="`/leads/${lead.id}`"
-            class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50"
-          >
-            <div>
-              <p class="text-sm font-medium">{{ lead.message?.slice(0, 80) ?? '(sense missatge)' }}<span v-if="lead.message && lead.message.length > 80">…</span></p>
-              <p class="text-xs text-neutral-500">{{ new Date(lead.created_at).toLocaleDateString('ca-ES') }} · Origen: {{ lead.source }}</p>
-            </div>
-            <LeadStatusBadge :status="lead.status" />
-          </RouterLink>
+          <LeadCardRow v-for="lead in person.leads" :key="lead.id" :lead="lead" />
         </div>
       </section>
 
