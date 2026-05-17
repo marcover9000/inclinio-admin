@@ -74,6 +74,7 @@ function submitPack() {
   if (!project.value) return;
   return run(async () => {
     await addHoursPack(project.value!.id, {
+      billing_mode: 'fixed',
       hours: Number(pack.value.hours),
       price_cents: Math.round(Number(pack.value.priceEuros) * 100),
       currency: 'EUR',

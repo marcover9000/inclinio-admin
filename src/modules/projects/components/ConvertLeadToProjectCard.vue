@@ -64,6 +64,7 @@ function convert() {
       name: mode.value === 'new' ? newName.value.trim() : undefined,
       project_id: mode.value === 'extend' ? targetProjectId.value! : undefined,
       pack: {
+        billing_mode: 'fixed' as const,
         hours: Number(pack.value.hours),
         price_cents: Math.round(Number(pack.value.priceEuros) * 100),
         currency: 'EUR',

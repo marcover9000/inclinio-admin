@@ -2,6 +2,8 @@ import type { Person, Company, Paginated } from '@/modules/contacts/types';
 
 export type ProjectStatus = 'active' | 'paused' | 'done' | 'archived';
 
+export type BillingMode = 'fixed' | 'hourly';
+
 export interface Money {
   cents: number;
   currency: string;
@@ -11,8 +13,10 @@ export interface Money {
 export interface HoursPack {
   id: number;
   project_id: number;
-  hours: number;
+  billing_mode: BillingMode;
+  hours: number | null;
   price: Money;
+  hourly_rate: Money | null;
   dated_on: string | null;
   reason: string;
   source_lead_id: number | null;

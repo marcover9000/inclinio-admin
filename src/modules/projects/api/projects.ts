@@ -1,5 +1,5 @@
 import { http } from '@/shared/http/client';
-import type { Paginated, Project, ProjectStatus } from '../types';
+import type { BillingMode, Paginated, Project, ProjectStatus } from '../types';
 
 export interface ListProjectsParams {
   page?: number;
@@ -30,11 +30,13 @@ export async function getProject(id: number): Promise<Project> {
 }
 
 export interface PackPayload {
-  hours: number;
-  price_cents: number;
+  billing_mode: BillingMode;
   currency: string;
   reason: string;
   dated_on?: string;
+  hours?: number;            // hourly: obligatori · fixed: estimació opcional
+  price_cents?: number;      // fixed
+  hourly_rate_cents?: number; // hourly
 }
 
 export interface CreateProjectPayload {

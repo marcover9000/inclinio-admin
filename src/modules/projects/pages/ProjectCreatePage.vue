@@ -50,6 +50,7 @@ async function submit() {
       due_at: form.value.dueAt || null,
       pack: form.value.addPack
         ? {
+            billing_mode: 'fixed' as const,
             hours: Number(form.value.packHours),
             price_cents: Math.round(Number(form.value.packPriceEuros) * 100),
             currency: 'EUR',
