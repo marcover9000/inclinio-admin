@@ -3,10 +3,12 @@
  * Layout per a rutes autenticades. Header amb branding + botó logout.
  * El contingut de la ruta es renderitza al <slot />.
  */
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useAuthStore } from '@/shared/stores/auth';
 import { useViewport } from '@/shared/composables/useViewport';
 import { RouterLink, useRouter } from 'vue-router';
+import Button from '@/shared/components/ui/Button.vue';
+import QuickAddTimeEntry from '@/modules/projects/components/QuickAddTimeEntry.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -29,10 +31,13 @@ const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', mobile: false },
   { to: '/leads', label: 'Leads', mobile: true },
   { to: '/projects', label: 'Projectes', mobile: true },
+  { to: '/my-hours', label: 'Les meves hores', mobile: true },
   { to: '/people', label: 'Persones', mobile: true },
   { to: '/companies', label: 'Empreses', mobile: true },
   { to: '/settings', label: 'Configuració', mobile: false, adminOnly: true },
 ];
+
+const globalQuickOpen = ref(false);
 
 const visibleNavItems = computed(() =>
   (isMobile.value ? navItems.filter((i) => i.mobile) : navItems)
@@ -64,6 +69,7 @@ async function handleLogout() {
           </RouterLink>
         </nav>
         <div class="flex items-center gap-4">
+          <Button variant="secondary" size="sm" @click="globalQuickOpen = true">+ Imputar</Button>
           <span class="text-sm text-neutral-600">{{ auth.user?.name }}</span>
           <button
             type="button"
@@ -79,5 +85,6 @@ async function handleLogout() {
     <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
       <slot />
     </main>
+    <QuickAddTimeEntry :open="globalQuickOpen" :project-id="null" :last-entry="null" @close="globalQuickOpen = false" @saved="globalQuickOpen = false" />
   </div>
 </template>

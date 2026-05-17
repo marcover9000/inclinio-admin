@@ -101,6 +101,11 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/my-hours',
+    component: () => import('@/modules/projects/pages/MyHoursPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/settings',
     component: () => import('@/modules/identity/pages/SettingsPage.vue'),
     meta: { requiresAuth: true, adminOnly: true },

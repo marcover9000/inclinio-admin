@@ -5,7 +5,7 @@ import {
   getProject, updateProject, deleteProject, changeProjectStatus, addHoursPack,
   updateHoursPack, deleteHoursPack,
   createTask, updateTask, deleteTask,
-  createTimeEntry, updateTimeEntry, deleteTimeEntry,
+  deleteTimeEntry,
 } from '../api/projects';
 import type { HoursPack, Project, ProjectStatus, Task, TaskStatus, TimeEntry } from '../types';
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from '../types';
@@ -20,14 +20,12 @@ import Badge from '@/shared/components/ui/Badge.vue';
 import Button from '@/shared/components/ui/Button.vue';
 import Card from '@/shared/components/ui/Card.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
-import Modal from '@/shared/components/ui/Modal.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import SelectField from '@/shared/components/form/SelectField.vue';
-import DateField from '@/shared/components/form/DateField.vue';
-import TextareaField from '@/shared/components/form/TextareaField.vue';
 import PackFields from '../components/PackFields.vue';
+import QuickAddTimeEntry from '../components/QuickAddTimeEntry.vue';
 import ProjectStatusBadge from '../components/ProjectStatusBadge.vue';
 import ProjectStatusSelector from '../components/ProjectStatusSelector.vue';
 import MoneyText from '../components/MoneyText.vue';
@@ -72,26 +70,12 @@ const taskStatusTone: Record<TaskStatus, 'neutral' | 'info' | 'success'> = {
 const entryToDelete = ref<TimeEntry | null>(null);
 
 const quickAddOpen = ref(false);
-const quickAddEditingId = ref<number | null>(null);
-const quickAddMinutesError = ref<string | null>(null);
+const quickAddEditing = ref<TimeEntry | null>(null);
 
-function todayIso(): string {
-  const n = new Date();
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())}`;
-}
-
-const qa = ref<{ worked_on: string; task_id: string; minutes: string; description: string }>({
-  worked_on: todayIso(),
-  task_id: '',
-  minutes: '60',
-  description: '',
+const lastTimeEntry = computed<TimeEntry | null>(() => {
+  const entries = project.value?.time_entries ?? [];
+  return entries.length > 0 ? entries[entries.length - 1] : null;
 });
-
-const taskOptions = computed(() => [
-  { value: '', label: '(sense tasca)' },
-  ...tasks.value.map((t) => ({ value: String(t.id), label: t.title })),
-]);
 
 // ─── Shadow rate override ────────────────────────────────────────────────────
 const shadowOverrideEuros = ref('');
@@ -236,62 +220,13 @@ function confirmDeleteTask() {
 
 // ─── TimeEntry actions ────────────────────────────────────────────────────────
 function openQuickAdd() {
-  quickAddEditingId.value = null;
-  quickAddMinutesError.value = null;
-  const entries = project.value?.time_entries ?? [];
-  const last = entries.length > 0 ? entries[entries.length - 1] : null;
-  qa.value = {
-    worked_on: last?.worked_on ?? todayIso(),
-    task_id: last?.task_id != null ? String(last.task_id) : '',
-    minutes: last ? String(last.minutes) : '60',
-    description: '',
-  };
+  quickAddEditing.value = null;
   quickAddOpen.value = true;
 }
 
-function openEditEntry(e: TimeEntry) {
-  quickAddEditingId.value = e.id;
-  quickAddMinutesError.value = null;
-  qa.value = {
-    worked_on: e.worked_on ?? todayIso(),
-    task_id: e.task_id != null ? String(e.task_id) : '',
-    minutes: String(e.minutes),
-    description: e.description,
-  };
+function startEditEntry(te: TimeEntry) {
+  quickAddEditing.value = te;
   quickAddOpen.value = true;
-}
-
-function closeQuickAdd() {
-  quickAddOpen.value = false;
-  quickAddEditingId.value = null;
-  quickAddMinutesError.value = null;
-}
-
-function submitQuickAdd() {
-  if (!project.value) return;
-  const mins = Number(qa.value.minutes);
-  if (!Number.isInteger(mins) || mins <= 0 || mins % 15 !== 0) {
-    quickAddMinutesError.value = 'Els minuts han de ser un múltiple de 15 i > 0.';
-    return;
-  }
-  quickAddMinutesError.value = null;
-  const payload = {
-    worked_on: qa.value.worked_on || todayIso(),
-    minutes: mins,
-    description: qa.value.description,
-    task_id: qa.value.task_id !== '' ? Number(qa.value.task_id) : null,
-  };
-  if (quickAddEditingId.value !== null) {
-    const entryId = quickAddEditingId.value;
-    return run(async () => {
-      project.value = await updateTimeEntry(project.value!.id, entryId, payload);
-      closeQuickAdd();
-    }, 'No s\'ha pogut desar la imputació.');
-  }
-  return run(async () => {
-    project.value = await createTimeEntry(project.value!.id, payload);
-    closeQuickAdd();
-  }, 'No s\'ha pogut afegir la imputació.');
 }
 
 function confirmDeleteEntry() {
@@ -554,7 +489,7 @@ onMounted(load);
                 <div class="flex items-center gap-3">
                   <button
                     type="button"
-                    @click="openEditEntry(e)"
+                    @click="startEditEntry(e)"
                     class="text-xs text-brand-600 hover:underline"
                   >Editar</button>
                   <button
@@ -616,23 +551,15 @@ onMounted(load);
         @cancel="showDelete = false"
       />
 
-      <!-- Quick-add / edit imputació Modal -->
-      <Modal :open="quickAddOpen" title="Imputar hores" @close="closeQuickAdd">
-        <div class="space-y-3">
-          <DateField v-model="qa.worked_on" label="Data" />
-          <SelectField v-model="qa.task_id" label="Tasca (opcional)" :options="taskOptions" />
-          <TextField
-            v-model="qa.minutes"
-            label="Minuts"
-            :error="quickAddMinutesError ?? undefined"
-          />
-          <TextareaField v-model="qa.description" label="Descripció" :rows="3" />
-          <div class="flex justify-end gap-3">
-            <Button type="button" variant="secondary" @click="closeQuickAdd">Cancel·lar</Button>
-            <Button type="button" variant="primary" :loading="loading" @click="submitQuickAdd">Desar</Button>
-          </div>
-        </div>
-      </Modal>
+      <QuickAddTimeEntry
+        :open="quickAddOpen"
+        :project-id="project.id"
+        :tasks="project.tasks ?? []"
+        :editing="quickAddEditing"
+        :last-entry="quickAddEditing ? null : lastTimeEntry"
+        @close="quickAddOpen = false"
+        @saved="p => { project = p; quickAddOpen = false }"
+      />
     </template>
   </AppShell>
 </template>

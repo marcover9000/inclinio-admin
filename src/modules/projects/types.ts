@@ -94,6 +94,8 @@ export interface TimeEntry {
   minutes: number;
   description: string;
   created_at: string;
+  project?: { id: number; name: string };
+  task?: { id: number; title: string } | null;
 }
 
 export interface ProjectAggregates {

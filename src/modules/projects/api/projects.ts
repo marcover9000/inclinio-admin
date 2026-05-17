@@ -1,5 +1,5 @@
 import { http } from '@/shared/http/client';
-import type { BillingMode, Paginated, Project, ProjectStatus } from '../types';
+import type { BillingMode, Paginated, Project, ProjectStatus, TimeEntry } from '../types';
 
 export interface ListProjectsParams {
   page?: number;
@@ -123,4 +123,16 @@ export async function updateTimeEntry(projectId: number, id: number, p: Partial<
 }
 export async function deleteTimeEntry(projectId: number, id: number): Promise<void> {
   await http.delete(`/api/projects/${projectId}/time-entries/${id}`);
+}
+
+export interface MyTimeEntriesParams { from?: string; to?: string; project_id?: number; task_id?: number; }
+
+export async function listMyTimeEntries(params: MyTimeEntriesParams = {}): Promise<TimeEntry[]> {
+  const q: Record<string, string | number> = {};
+  if (params.from) q.from = params.from;
+  if (params.to) q.to = params.to;
+  if (params.project_id) q.project_id = params.project_id;
+  if (params.task_id) q.task_id = params.task_id;
+  const { data } = await http.get<{ data: TimeEntry[] }>('/api/time-entries', { params: q });
+  return data.data;
 }
