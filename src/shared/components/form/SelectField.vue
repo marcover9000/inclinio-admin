@@ -17,17 +17,18 @@ const id = useId();
 </script>
 
 <template>
-  <div class="flex flex-col gap-1">
-    <label :for="id" class="text-sm font-medium text-neutral-700">{{ label }}</label>
+  <div class="space-y-1">
+    <label :for="id" class="block text-sm font-medium text-neutral-700">{{ label }}</label>
     <select
       :id="id"
       :value="modelValue ?? ''"
       :disabled="disabled"
       @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
-      class="rounded border-neutral-300 focus:ring-2 focus:ring-brand-500"
+      class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 shadow-sm focus:border-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-500 disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+      :class="{ 'border-danger-500': error }"
     >
       <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
     </select>
-    <span v-if="error" class="text-sm text-danger-600">{{ error }}</span>
+    <p v-if="error" class="text-sm text-danger-600">{{ error }}</p>
   </div>
 </template>
