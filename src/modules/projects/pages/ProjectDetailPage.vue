@@ -7,6 +7,7 @@ import {
 import type { Project, ProjectStatus } from '../types';
 import { PROJECT_STATUS_LABELS } from '../types';
 import { extractErrorMessage } from '@/shared/http/errors';
+import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import { formatDate } from '@/shared/utils/date';
 import AppShell from '@/shared/components/AppShell.vue';
@@ -16,6 +17,7 @@ import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import TextField from '@/shared/components/form/TextField.vue';
+import PackFields from '../components/PackFields.vue';
 import ProjectStatusBadge from '../components/ProjectStatusBadge.vue';
 import ProjectStatusSelector from '../components/ProjectStatusSelector.vue';
 import MoneyText from '../components/MoneyText.vue';
@@ -30,7 +32,8 @@ const pendingStatus = ref<ProjectStatus | null>(null);
 const { run, loading, errorMsg: actionError } = useAsyncAction();
 const errorMsg = computed(() => actionError.value ?? loadError.value);
 
-const pack = ref({ hours: '', priceEuros: '', reason: 'Ampliació' });
+const packState = ref(emptyPackState('Ampliació'));
+const packValid = computed(() => packIsValid(packState.value));
 
 function clientName(p: Project): string {
   if (p.is_internal) return 'Projecte intern';
@@ -73,14 +76,8 @@ function saveName() {
 function submitPack() {
   if (!project.value) return;
   return run(async () => {
-    await addHoursPack(project.value!.id, {
-      billing_mode: 'fixed',
-      hours: Number(pack.value.hours),
-      price_cents: Math.round(Number(pack.value.priceEuros) * 100),
-      currency: 'EUR',
-      reason: pack.value.reason || 'Ampliació',
-    });
-    pack.value = { hours: '', priceEuros: '', reason: 'Ampliació' };
+    await addHoursPack(project.value!.id, buildPackPayload(packState.value));
+    packState.value = emptyPackState('Ampliació');
     await load();
   }, 'No s\'ha pogut afegir la bossa d\'hores.');
 }
@@ -165,14 +162,8 @@ onMounted(load);
           </tbody>
         </table>
 
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
-          <TextField v-model="pack.hours" label="Hores ampliació" placeholder="10" />
-          <TextField v-model="pack.priceEuros" label="Preu tancat (€)" placeholder="1200" />
-          <TextField v-model="pack.reason" label="Concepte" />
-          <div class="flex items-end">
-            <SubmitButton :loading="loading" @click="submitPack">Afegir ampliació</SubmitButton>
-          </div>
-        </div>
+        <PackFields v-model="packState" />
+        <SubmitButton class="mt-3" :loading="loading" :disabled="!packValid" @click="submitPack">Afegir ampliació</SubmitButton>
         <p class="mt-2 text-xs text-neutral-500">Afegir una ampliació a un projecte acabat/arxivat el reobre automàticament.</p>
       </section>
 

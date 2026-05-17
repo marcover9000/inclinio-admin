@@ -3,12 +3,14 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createProject } from '../api/projects';
 import { extractErrorMessage } from '@/shared/http/errors';
+import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import DateField from '@/shared/components/form/DateField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import CompanyPicker from '@/modules/contacts/components/CompanyPicker.vue';
+import PackFields from '../components/PackFields.vue';
 
 const router = useRouter();
 
@@ -20,10 +22,9 @@ const form = ref({
   startedAt: '',
   dueAt: '',
   addPack: false,
-  packHours: '' as string,
-  packPriceEuros: '' as string,
-  packReason: 'Venda inicial',
 });
+
+const packState = ref(emptyPackState('Venda inicial'));
 
 const error = ref<string | null>(null);
 const loading = ref(false);
@@ -35,7 +36,8 @@ const dueBeforeStart = computed(() =>
 const canSubmit = computed(() =>
   form.value.name.trim().length > 0
   && (form.value.isInternal || form.value.companyId !== null)
-  && !dueBeforeStart.value,
+  && !dueBeforeStart.value
+  && (!form.value.addPack || packIsValid(packState.value)),
 );
 
 async function submit() {
@@ -48,15 +50,7 @@ async function submit() {
       client_company_id: form.value.isInternal ? null : form.value.companyId,
       started_at: form.value.startedAt || null,
       due_at: form.value.dueAt || null,
-      pack: form.value.addPack
-        ? {
-            billing_mode: 'fixed' as const,
-            hours: Number(form.value.packHours),
-            price_cents: Math.round(Number(form.value.packPriceEuros) * 100),
-            currency: 'EUR',
-            reason: form.value.packReason || 'Venda inicial',
-          }
-        : undefined,
+      pack: form.value.addPack ? buildPackPayload(packState.value) : undefined,
     });
     router.push(`/projects/${project.id}`);
   } catch (e) {
@@ -104,11 +98,7 @@ async function submit() {
           <input type="checkbox" v-model="form.addPack" />
           Afegir el pack #1 (venda inicial) ara
         </label>
-        <div v-if="form.addPack" class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <TextField v-model="form.packHours" label="Hores" placeholder="40" />
-          <TextField v-model="form.packPriceEuros" label="Preu tancat (€)" placeholder="4000" />
-          <TextField v-model="form.packReason" label="Concepte" />
-        </div>
+        <PackFields v-if="form.addPack" v-model="packState" />
       </fieldset>
 
       <SubmitButton :loading="loading" :disabled="!canSubmit" :block="true">Crear Projecte</SubmitButton>

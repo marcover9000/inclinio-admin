@@ -5,9 +5,11 @@ import { listProjects, convertLeadToProject } from '../api/projects';
 import type { Project } from '../types';
 import type { Lead } from '@/modules/crm/types';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
+import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import TextField from '@/shared/components/form/TextField.vue';
+import PackFields from './PackFields.vue';
 
 /*
  * Conversió Lead 'won' → Projecte. Recomana (no bloqueja): si el client
@@ -23,7 +25,7 @@ const targetProjectId = ref<number | null>(null);
 const clientProjects = ref<Project[]>([]);
 const recommendation = ref<string>('');
 
-const pack = ref({ hours: '', priceEuros: '', reason: 'Venda inicial' });
+const packState = ref(emptyPackState('Venda inicial'));
 
 const { run, loading, errorMsg } = useAsyncAction();
 
@@ -31,10 +33,10 @@ const clientLabel = computed(
   () => props.lead.company?.name ?? props.lead.person?.full_name ?? 'aquest client',
 );
 
-const canSubmit = computed(() => {
-  if (!pack.value.hours || !pack.value.priceEuros) return false;
-  return mode.value === 'new' ? newName.value.trim().length > 0 : targetProjectId.value !== null;
-});
+const canSubmit = computed(() =>
+  packIsValid(packState.value)
+  && (mode.value === 'new' ? newName.value.trim().length > 0 : targetProjectId.value !== null),
+);
 
 onMounted(async () => {
   newName.value = `Projecte ${clientLabel.value}`;
@@ -63,13 +65,7 @@ function convert() {
       mode: mode.value,
       name: mode.value === 'new' ? newName.value.trim() : undefined,
       project_id: mode.value === 'extend' ? targetProjectId.value! : undefined,
-      pack: {
-        billing_mode: 'fixed' as const,
-        hours: Number(pack.value.hours),
-        price_cents: Math.round(Number(pack.value.priceEuros) * 100),
-        currency: 'EUR',
-        reason: pack.value.reason || (mode.value === 'new' ? 'Venda inicial' : 'Ampliació'),
-      },
+      pack: buildPackPayload(packState.value),
     });
     router.push(`/projects/${project.id}`);
   }, 'No s\'ha pogut convertir el lead a projecte.');
@@ -105,11 +101,7 @@ function convert() {
       </div>
     </div>
 
-    <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-      <TextField v-model="pack.hours" label="Hores venudes" placeholder="40" />
-      <TextField v-model="pack.priceEuros" label="Preu tancat (€)" placeholder="4000" />
-      <TextField v-model="pack.reason" label="Concepte" />
-    </div>
+    <PackFields class="mt-3" v-model="packState" />
 
     <SubmitButton class="mt-4" :loading="loading" :disabled="!canSubmit" @click="convert">
       {{ mode === 'new' ? 'Crear projecte des del lead' : 'Afegir ampliació des del lead' }}
