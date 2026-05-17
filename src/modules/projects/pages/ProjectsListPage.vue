@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { listProjects } from '../api/projects';
-import { PROJECT_STATUSES } from '../types';
+import { PROJECT_STATUSES, PROJECT_STATUS_LABELS } from '../types';
 import type { Project, ProjectStatus } from '../types';
 import { formatDate } from '@/shared/utils/date';
 import { usePaginatedResource } from '@/shared/composables/usePaginatedResource';
@@ -10,6 +10,11 @@ import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import FilterBar from '@/shared/components/ui/FilterBar.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
+import ToggleChip from '@/shared/components/ui/ToggleChip.vue';
+import TextField from '@/shared/components/form/TextField.vue';
 import ProjectStatusBadge from '../components/ProjectStatusBadge.vue';
 import MoneyText from '../components/MoneyText.vue';
 
@@ -50,33 +55,22 @@ function clientName(p: Project): string {
 
 <template>
   <AppShell>
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Projectes</h1>
-      <RouterLink to="/projects/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nou Projecte</RouterLink>
-    </div>
+    <PageHeader title="Projectes">
+      <template #actions>
+        <Button variant="primary" :to="{ path: '/projects/new' }">+ Nou Projecte</Button>
+      </template>
+    </PageHeader>
 
-    <div class="flex flex-wrap items-center gap-3">
-      <input
-        v-model="search"
-        placeholder="Cerca per nom…"
-        class="rounded border border-neutral-300 text-sm"
-      />
-      <button
+    <FilterBar>
+      <TextField v-model="search" label="Cerca" placeholder="Cerca per nom…" class="w-72" />
+      <ToggleChip
         v-for="s in PROJECT_STATUSES"
         :key="s"
-        type="button"
-        @click="toggleStatus(s)"
-        :class="[
-          'rounded-full border px-3 py-1 text-xs',
-          selectedStatuses.includes(s) ? 'border-brand-300 bg-brand-50 text-brand-800' : 'border-neutral-300 text-neutral-500',
-        ]"
-      >
-        {{ s }}
-      </button>
-      <label class="flex items-center gap-1 text-xs text-neutral-600">
-        <input type="checkbox" v-model="onlyInternal" /> Només interns
-      </label>
-    </div>
+        :active="selectedStatuses.includes(s)"
+        @toggle="toggleStatus(s)"
+      >{{ PROJECT_STATUS_LABELS[s] }}</ToggleChip>
+      <ToggleChip :active="onlyInternal" @toggle="onlyInternal = !onlyInternal">Només interns</ToggleChip>
+    </FilterBar>
 
     <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
 

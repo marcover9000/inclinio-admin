@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import type { PackFormState } from '../pack';
 import { packTotalCents } from '../pack';
 import TextField from '@/shared/components/form/TextField.vue';
+import ToggleChip from '@/shared/components/ui/ToggleChip.vue';
 
 /*
  * Camps d'una venda/pack, reutilitzats a crear projecte, ampliació i
@@ -18,31 +19,13 @@ const totalFormatted = computed(() => {
     ? '—'
     : `${(c / 100).toLocaleString('ca-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 });
-
-function setMode(m: 'fixed' | 'hourly'): void {
-  model.value.mode = m;
-}
 </script>
 
 <template>
   <div class="space-y-4">
     <div class="flex gap-2">
-      <button
-        type="button"
-        @click="setMode('fixed')"
-        :class="[
-          'rounded border px-3 py-1.5 text-sm',
-          model.mode === 'fixed' ? 'border-brand-300 bg-brand-50 text-brand-800' : 'border-neutral-300 text-neutral-600',
-        ]"
-      >Preu tancat</button>
-      <button
-        type="button"
-        @click="setMode('hourly')"
-        :class="[
-          'rounded border px-3 py-1.5 text-sm',
-          model.mode === 'hourly' ? 'border-brand-300 bg-brand-50 text-brand-800' : 'border-neutral-300 text-neutral-600',
-        ]"
-      >Per hores</button>
+      <ToggleChip :active="model.mode === 'fixed'" @toggle="model.mode = 'fixed'">Preu tancat</ToggleChip>
+      <ToggleChip :active="model.mode === 'hourly'" @toggle="model.mode = 'hourly'">Per hores</ToggleChip>
     </div>
 
     <div v-if="model.mode === 'fixed'" class="grid grid-cols-1 gap-4 md:grid-cols-2">

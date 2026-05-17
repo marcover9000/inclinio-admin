@@ -7,8 +7,10 @@ import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import DateField from '@/shared/components/form/DateField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import CompanyPicker from '@/modules/contacts/components/CompanyPicker.vue';
 import PackFields from '../components/PackFields.vue';
 
@@ -63,11 +65,10 @@ async function submit() {
 
 <template>
   <AppShell>
-    <h1 class="text-2xl font-semibold">Nou Projecte</h1>
+    <PageHeader title="Nou Projecte" />
     <AlertMessage v-if="error" variant="error" :message="error" />
     <form @submit.prevent="submit" class="space-y-6">
-      <fieldset class="rounded border border-neutral-200 p-4 space-y-4">
-        <legend class="px-2 text-sm font-medium">Projecte</legend>
+      <Card as="fieldset" title="Projecte">
         <TextField v-model="form.name" label="Nom *" />
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" v-model="form.isInternal" />
@@ -90,18 +91,19 @@ async function submit() {
             :error="dueBeforeStart ? 'L\'entrega no pot ser anterior a l\'inici.' : undefined"
           />
         </div>
-      </fieldset>
+      </Card>
 
-      <fieldset class="rounded border border-neutral-200 p-4 space-y-4">
-        <legend class="px-2 text-sm font-medium">Bossa d'hores inicial (opcional)</legend>
+      <Card as="fieldset" title="Bossa d'hores inicial (opcional)">
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" v-model="form.addPack" />
           Afegir el pack #1 (venda inicial) ara
         </label>
         <PackFields v-if="form.addPack" v-model="packState" />
-      </fieldset>
+      </Card>
 
-      <SubmitButton :loading="loading" :disabled="!canSubmit" :block="true">Crear Projecte</SubmitButton>
+      <div class="flex justify-end">
+        <Button type="submit" variant="primary" :loading="loading" :disabled="!canSubmit">Crear Projecte</Button>
+      </div>
     </form>
   </AppShell>
 </template>

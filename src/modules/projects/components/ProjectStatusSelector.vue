@@ -23,7 +23,7 @@ watch(() => props.current, () => {
   <select
     v-model="selected"
     @change="onChange"
-    class="rounded border-neutral-300 text-sm"
+    class="!rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
   >
     <option value="">Canviar estat…</option>
     <option v-for="next in VALID_PROJECT_TRANSITIONS[current]" :key="next" :value="next">

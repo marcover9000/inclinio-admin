@@ -14,10 +14,11 @@ import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import { formatDate } from '@/shared/utils/date';
 import AppShell from '@/shared/components/AppShell.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
-import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import PackFields from '../components/PackFields.vue';
 import ProjectStatusBadge from '../components/ProjectStatusBadge.vue';
@@ -141,17 +142,15 @@ onMounted(load);
       back-label="Tornar al llistat"
     />
     <template v-if="project">
-      <header class="flex items-start justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold">{{ project.name }}</h1>
-          <p class="text-sm text-neutral-500">{{ clientName(project) }}</p>
-        </div>
-        <div class="flex items-center gap-3">
+      <PageHeader :title="project.name" :subtitle="clientName(project)">
+        <template #badge>
           <ProjectStatusBadge :status="project.status" />
+        </template>
+        <template #actions>
           <ProjectStatusSelector :current="project.status" @select="onSelectStatus" />
-          <DangerButton @click="showDelete = true">Eliminar Projecte</DangerButton>
-        </div>
-      </header>
+          <Button variant="danger" @click="showDelete = true">Eliminar Projecte</Button>
+        </template>
+      </PageHeader>
 
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
 
@@ -174,15 +173,17 @@ onMounted(load);
         </div>
       </section>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-2 text-lg font-medium">Nom</h2>
-        <TextField v-model="project.name" label="Nom del projecte" />
-        <SubmitButton class="mt-2" :loading="loading" @click="saveName">Desar canvis</SubmitButton>
-      </section>
+      <Card title="Nom">
+        <form @submit.prevent="saveName" class="space-y-3">
+          <TextField v-model="project.name" label="Nom del projecte" />
+          <div class="flex justify-end">
+            <Button type="submit" variant="primary" :loading="loading">Desar canvis</Button>
+          </div>
+        </form>
+      </Card>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-3 text-lg font-medium">Bosses d'hores ({{ project.hours_packs?.length ?? 0 }})</h2>
-        <table class="mb-4 min-w-full divide-y divide-neutral-200 text-sm">
+      <Card :title="`Bosses d'hores (${project.hours_packs?.length ?? 0})`">
+        <table class="min-w-full divide-y divide-neutral-200 text-sm">
           <thead>
             <tr class="text-left text-xs uppercase text-neutral-500">
               <th class="py-2">Data</th><th>Hores</th><th>Preu</th><th>Concepte</th><th>Lead</th><th></th>
@@ -216,19 +217,18 @@ onMounted(load);
           </tbody>
         </table>
 
-        <div v-if="editingPackId !== null" class="mb-2 flex items-center justify-between">
+        <div v-if="editingPackId !== null" class="flex items-center justify-between">
           <p class="text-sm font-medium text-neutral-700">Editant pack #{{ editingPackId }}</p>
           <button type="button" @click="cancelEditPack" class="text-xs text-neutral-600 hover:underline">Cancel·lar</button>
         </div>
         <PackFields v-model="packState" />
-        <SubmitButton
-          class="mt-3"
-          :loading="loading"
-          :disabled="!packValid"
-          @click="submitPack"
-        >{{ editingPackId !== null ? 'Desar pack' : 'Afegir ampliació' }}</SubmitButton>
-        <p v-if="editingPackId === null" class="mt-2 text-xs text-neutral-500">Afegir una ampliació a un projecte acabat/arxivat el reobre automàticament.</p>
-      </section>
+        <div class="flex justify-end">
+          <Button type="submit" variant="primary" :loading="loading" :disabled="!packValid" @click="submitPack">
+            {{ editingPackId !== null ? 'Desar pack' : 'Afegir ampliació' }}
+          </Button>
+        </div>
+        <p v-if="editingPackId === null" class="text-xs text-neutral-500">Afegir una ampliació a un projecte acabat/arxivat el reobre automàticament.</p>
+      </Card>
 
       <ConfirmDialog
         :open="pendingStatus !== null"

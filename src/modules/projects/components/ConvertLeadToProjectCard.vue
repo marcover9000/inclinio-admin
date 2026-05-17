@@ -7,7 +7,7 @@ import type { Lead } from '@/modules/crm/types';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
+import Button from '@/shared/components/ui/Button.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import PackFields from './PackFields.vue';
 
@@ -103,8 +103,10 @@ function convert() {
 
     <PackFields class="mt-3" v-model="packState" />
 
-    <SubmitButton class="mt-4" :loading="loading" :disabled="!canSubmit" @click="convert">
-      {{ mode === 'new' ? 'Crear projecte des del lead' : 'Afegir ampliació des del lead' }}
-    </SubmitButton>
+    <div class="mt-4 flex justify-end">
+      <Button type="submit" variant="primary" :loading="loading" :disabled="!canSubmit" @click="convert">
+        {{ mode === 'new' ? 'Crear projecte des del lead' : 'Afegir ampliació des del lead' }}
+      </Button>
+    </div>
   </section>
 </template>
