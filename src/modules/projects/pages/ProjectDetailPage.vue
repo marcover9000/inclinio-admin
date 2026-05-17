@@ -166,7 +166,7 @@ onMounted(load);
 
         <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
           <TextField v-model="pack.hours" label="Hores ampliació" placeholder="10" />
-          <TextField v-model="pack.priceEuros" label="Preu (€)" placeholder="1200" />
+          <TextField v-model="pack.priceEuros" label="Preu tancat (€)" placeholder="1200" />
           <TextField v-model="pack.reason" label="Concepte" />
           <div class="flex items-end">
             <SubmitButton :loading="loading" @click="submitPack">Afegir ampliació</SubmitButton>

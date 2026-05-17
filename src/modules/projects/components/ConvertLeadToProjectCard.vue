@@ -106,7 +106,7 @@ function convert() {
 
     <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
       <TextField v-model="pack.hours" label="Hores venudes" placeholder="40" />
-      <TextField v-model="pack.priceEuros" label="Preu (€)" placeholder="4000" />
+      <TextField v-model="pack.priceEuros" label="Preu tancat (€)" placeholder="4000" />
       <TextField v-model="pack.reason" label="Concepte" />
     </div>
 

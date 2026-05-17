@@ -94,7 +94,7 @@ async function submit() {
         </label>
         <div v-if="form.addPack" class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <TextField v-model="form.packHours" label="Hores" placeholder="40" />
-          <TextField v-model="form.packPriceEuros" label="Preu (€)" placeholder="4000" />
+          <TextField v-model="form.packPriceEuros" label="Preu tancat (€)" placeholder="4000" />
           <TextField v-model="form.packReason" label="Concepte" />
         </div>
       </fieldset>
