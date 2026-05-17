@@ -14,19 +14,29 @@ const { isMobile } = useViewport();
 
 /*
  * Nav declarativa. `mobile: false` = secció no consultable des de mòbil
- * (p.ex. Dashboard, i futures vistes tècniques/config). Afegir-hi
+ * (p.ex. Dashboard, i futures vistes tècniques/config). `adminOnly: true`
+ * = secció només visible per a usuaris amb role === 'admin'. Afegir-hi
  * "Projectes" o seccions noves és només una línia més en aquest array.
  */
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  mobile: boolean;
+  adminOnly?: boolean;
+}
+
+const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', mobile: false },
   { to: '/leads', label: 'Leads', mobile: true },
   { to: '/projects', label: 'Projectes', mobile: true },
   { to: '/people', label: 'Persones', mobile: true },
   { to: '/companies', label: 'Empreses', mobile: true },
+  { to: '/settings', label: 'Configuració', mobile: false, adminOnly: true },
 ];
 
 const visibleNavItems = computed(() =>
-  isMobile.value ? navItems.filter((item) => item.mobile) : navItems,
+  (isMobile.value ? navItems.filter((i) => i.mobile) : navItems)
+    .filter((i) => !i.adminOnly || auth.user?.role === 'admin'),
 );
 
 async function handleLogout() {

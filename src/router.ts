@@ -100,6 +100,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/projects/pages/ProjectDetailPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/settings',
+    component: () => import('@/modules/identity/pages/SettingsPage.vue'),
+    meta: { requiresAuth: true, adminOnly: true },
+  },
 ];
 
 export const router = createRouter({
@@ -116,6 +121,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { path: '/login', query: { redirect: to.fullPath } };
+  }
+
+  if (to.meta.adminOnly && auth.user?.role !== 'admin') {
+    return { path: '/dashboard' };
   }
 
   if (to.meta.guestOnly && auth.isAuthenticated) {
