@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
+import Button from '@/shared/components/ui/Button.vue';
 
 const emit = defineEmits<{ submit: [body: string] }>();
 
@@ -20,6 +20,8 @@ async function onSubmit() {
 <template>
   <form @submit.prevent="onSubmit" class="space-y-2">
     <TextareaField v-model="body" label="Afegir nota" placeholder="Anota un avenç, una idea, un acord…" />
-    <SubmitButton :loading="loading" :disabled="!body.trim()" :block="true">Afegir</SubmitButton>
+    <div class="flex justify-end">
+      <Button type="submit" variant="primary" :loading="loading" :disabled="!body.trim()">Afegir</Button>
+    </div>
   </form>
 </template>

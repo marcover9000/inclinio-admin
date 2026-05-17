@@ -10,6 +10,8 @@ import AppShell from '@/shared/components/AppShell.vue';
 import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadFiltersBar from '../components/LeadFiltersBar.vue';
 
@@ -40,16 +42,19 @@ const { data, loading, errorMsg, page } = usePaginatedResource<Lead>({
 
 <template>
   <AppShell>
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Leads</h1>
-      <RouterLink to="/leads/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nou Lead</RouterLink>
-    </div>
+    <PageHeader title="Leads">
+      <template #actions>
+        <Button variant="primary" :to="{ path: '/leads/new' }">+ Nou Lead</Button>
+      </template>
+    </PageHeader>
+
     <LeadFiltersBar
       v-model:search="search"
       v-model:selectedStatuses="selectedStatuses"
       v-model:selectedTags="selectedTags"
       :available-tags="[]"
     />
+
     <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
     <DataTable
       :rows="data?.data ?? []"

@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import type { LeadStatus } from '../types';
 import { LEAD_STATUS_LABELS } from '../types';
+import Badge from '@/shared/components/ui/Badge.vue';
 
 defineProps<{ status: LeadStatus }>();
 
-const colors: Record<LeadStatus, string> = {
-  new: 'bg-brand-100 text-brand-800',
-  contacted: 'bg-warning-100 text-warning-800',
-  qualified: 'bg-info-100 text-info-800',
-  proposal: 'bg-accent-100 text-accent-800',
-  won: 'bg-success-100 text-success-800',
-  lost: 'bg-neutral-100 text-neutral-600',
+const tones: Record<LeadStatus, 'brand' | 'warning' | 'info' | 'accent' | 'success' | 'neutral'> = {
+  new: 'brand',
+  contacted: 'warning',
+  qualified: 'info',
+  proposal: 'accent',
+  won: 'success',
+  lost: 'neutral',
 };
 </script>
 
 <template>
-  <span :class="['inline-flex rounded-full px-2 py-0.5 text-xs font-medium', colors[status]]">
-    {{ LEAD_STATUS_LABELS[status] }}
-  </span>
+  <Badge :tone="tones[status]">{{ LEAD_STATUS_LABELS[status] }}</Badge>
 </template>

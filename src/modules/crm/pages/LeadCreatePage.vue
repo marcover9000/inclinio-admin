@@ -8,7 +8,9 @@ import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import CompanyPicker from '@/modules/contacts/components/CompanyPicker.vue';
 
@@ -125,11 +127,10 @@ onMounted(async () => {
 
 <template>
   <AppShell>
-    <h1 class="text-2xl font-semibold">Nou Lead</h1>
+    <PageHeader title="Nou Lead" />
     <AlertMessage v-if="error" variant="error" :message="error" />
     <form @submit.prevent="submit" class="space-y-6">
-      <fieldset class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Persona</legend>
+      <Card as="fieldset" title="Persona">
         <div v-if="form.person.useExisting" class="mb-3 flex items-center justify-between rounded bg-brand-50 px-3 py-2 text-sm text-brand-800">
           <span>Aquesta persona ja existeix al CRM.</span>
           <button type="button" @click="clearPersonSelection" class="text-xs text-brand-700 underline hover:text-brand-900">Esborrar selecció</button>
@@ -169,15 +170,13 @@ onMounted(async () => {
           <TextField v-model="form.person.phone" label="Telèfon" :disabled="form.person.useExisting" />
           <TextField v-model="form.person.position" label="Càrrec" :disabled="form.person.useExisting" />
         </div>
-      </fieldset>
+      </Card>
 
-      <fieldset v-if="form.person.useExisting && pickedPersonCompany" class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Empresa</legend>
+      <Card v-if="form.person.useExisting && pickedPersonCompany" as="fieldset" title="Empresa">
         <p class="text-sm text-neutral-600">Empresa de la persona: <strong>{{ pickedPersonCompany.name }}</strong></p>
-      </fieldset>
+      </Card>
 
-      <fieldset v-if="!form.person.useExisting" class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Empresa</legend>
+      <Card v-if="!form.person.useExisting" as="fieldset" title="Empresa">
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" v-model="form.hasCompany" /> Aquest lead està lligat a una empresa
         </label>
@@ -193,15 +192,16 @@ onMounted(async () => {
           <TextField v-model="form.company.website" label="Web" />
           <TextField v-model="form.company.address" label="Adreça" />
         </div>
-      </fieldset>
+      </Card>
 
-      <fieldset class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Lead</legend>
+      <Card as="fieldset" title="Lead">
         <TextareaField v-model="form.message" label="Missatge *" :rows="6" />
         <TextField v-model="form.tagsRaw" label="Tags (separats per coma)" placeholder="web, seo, branding" class="mt-4" />
-      </fieldset>
+      </Card>
 
-      <SubmitButton :loading="loading" :block="true">Crear Lead</SubmitButton>
+      <div class="flex justify-end">
+        <Button type="submit" variant="primary" :loading="loading">Crear Lead</Button>
+      </div>
     </form>
   </AppShell>
 </template>

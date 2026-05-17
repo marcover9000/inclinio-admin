@@ -7,16 +7,19 @@ import type { Lead, LeadStatus } from '../types';
 import { extractErrorMessage } from '@/shared/http/errors';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
-import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
+import Badge from '@/shared/components/ui/Badge.vue';
 import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadStatusSelector from '../components/LeadStatusSelector.vue';
 import LeadNoteList from '../components/LeadNoteList.vue';
 import LeadNoteForm from '../components/LeadNoteForm.vue';
 import ConvertLeadToProjectCard from '@/modules/projects/components/ConvertLeadToProjectCard.vue';
+import TextField from '@/shared/components/form/TextField.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -99,48 +102,50 @@ onMounted(load);
   <AppShell>
     <NotFoundFallback v-if="errorMsg && !lead" :message="errorMsg" back-to="/leads" back-label="Tornar al llistat" />
     <template v-if="lead">
-      <header class="flex items-start justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold">{{ lead.person?.full_name ?? '(persona eliminada)' }}</h1>
-          <p v-if="lead.company" class="text-sm text-neutral-500">{{ lead.company.name }}</p>
-        </div>
-        <div class="flex items-center gap-3">
+      <PageHeader
+        :title="lead.person?.full_name ?? '(persona eliminada)'"
+        :subtitle="lead.company?.name"
+      >
+        <template #badge>
           <LeadStatusBadge :status="lead.status" />
+        </template>
+        <template #actions>
           <LeadStatusSelector :current="lead.status" @select="onSelectStatus" />
-        </div>
-      </header>
+          <Button variant="danger" @click="showDelete = true">Eliminar Lead</Button>
+        </template>
+      </PageHeader>
 
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-2 text-lg font-medium">Missatge inicial</h2>
+      <Card title="Missatge inicial">
         <p class="whitespace-pre-wrap text-sm text-neutral-700">{{ lead.message || '—' }}</p>
         <p class="mt-3 text-xs text-neutral-500">Origen: {{ lead.source }}</p>
-      </section>
+      </Card>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-2 text-lg font-medium">Tags</h2>
-        <input
-          :value="lead.tags.join(', ')"
-          @change="lead.tags = (($event.target as HTMLInputElement).value).split(',').map(t => t.trim()).filter(Boolean)"
-          class="w-full rounded border-neutral-300"
-          placeholder="web, seo, …"
-        />
-        <SubmitButton class="mt-2" :loading="loading" @click="saveLead">Desar canvis</SubmitButton>
-      </section>
+      <Card title="Tags">
+        <form @submit.prevent="saveLead" class="space-y-3">
+          <div class="flex flex-wrap gap-1">
+            <Badge v-for="tag in lead.tags" :key="tag" tone="neutral">{{ tag }}</Badge>
+          </div>
+          <TextField
+            :model-value="lead.tags.join(', ')"
+            @update:model-value="lead.tags = $event.split(',').map((t: string) => t.trim()).filter(Boolean)"
+            label="Tags (separats per coma)"
+            placeholder="web, seo, …"
+          />
+          <div class="flex justify-end">
+            <Button type="submit" variant="primary" :loading="loading">Desar canvis</Button>
+          </div>
+        </form>
+      </Card>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-3 text-lg font-medium">Notes ({{ lead.notes?.length ?? 0 }})</h2>
+      <Card :title="`Notes (${lead.notes?.length ?? 0})`">
         <LeadNoteForm @submit="onAddNote" />
         <hr class="my-3" />
         <LeadNoteList :notes="lead.notes ?? []" @delete="onDeleteNote" />
-      </section>
+      </Card>
 
       <ConvertLeadToProjectCard v-if="lead.status === 'won'" :lead="lead" />
-
-      <div class="flex justify-end">
-        <DangerButton @click="showDelete = true">Eliminar Lead</DangerButton>
-      </div>
 
       <ConfirmDialog
         :open="showConvertModal"
