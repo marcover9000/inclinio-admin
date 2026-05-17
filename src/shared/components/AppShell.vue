@@ -20,6 +20,7 @@ const { isMobile } = useViewport();
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', mobile: false },
   { to: '/leads', label: 'Leads', mobile: true },
+  { to: '/projects', label: 'Projectes', mobile: true },
   { to: '/people', label: 'Persones', mobile: true },
   { to: '/companies', label: 'Empreses', mobile: true },
 ];

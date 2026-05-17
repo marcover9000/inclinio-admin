@@ -85,6 +85,21 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/crm/pages/LeadDetailPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/projects',
+    component: () => import('@/modules/projects/pages/ProjectsListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/projects/new',
+    component: () => import('@/modules/projects/pages/ProjectCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/projects/:id',
+    component: () => import('@/modules/projects/pages/ProjectDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({
