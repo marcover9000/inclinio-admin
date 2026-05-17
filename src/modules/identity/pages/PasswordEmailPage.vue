@@ -7,8 +7,9 @@
 import { ref, reactive } from 'vue';
 import { requestPasswordReset } from '@/modules/identity/api/auth';
 import TextField from '@/shared/components/form/TextField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
 
 const form = reactive({ email: '' });
 const errors = reactive<Record<string, string>>({});
@@ -40,35 +41,37 @@ async function handleSubmit() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6">
-      <div class="text-center space-y-1">
-        <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
-        <p class="text-sm text-neutral-500">Recupera la contrasenya</p>
-      </div>
+    <div class="w-full max-w-md">
+      <Card>
+        <div class="text-center space-y-1">
+          <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
+          <p class="text-sm text-neutral-500">Recupera la contrasenya</p>
+        </div>
 
-      <AlertMessage v-if="globalError" variant="error" :message="globalError" />
-      <AlertMessage v-if="successMessage" variant="success" :message="successMessage" />
+        <AlertMessage v-if="globalError" variant="error" :message="globalError" />
+        <AlertMessage v-if="successMessage" variant="success" :message="successMessage" />
 
-      <form v-if="!successMessage" class="space-y-4" @submit.prevent="handleSubmit">
-        <p class="text-sm text-neutral-600">
-          Introdueix el teu correu electrònic. Si està registrat, t'enviarem un enllaç per restablir la contrasenya.
-        </p>
-        <TextField
-          v-model="form.email"
-          label="Correu electrònic"
-          type="email"
-          autocomplete="email"
-          required
-          :error="errors.email"
-        />
-        <SubmitButton :loading="loading" label="Enviar enllaç" :block="true" />
-      </form>
+        <form v-if="!successMessage" class="space-y-4" @submit.prevent="handleSubmit">
+          <p class="text-sm text-neutral-600">
+            Introdueix el teu correu electrònic. Si està registrat, t'enviarem un enllaç per restablir la contrasenya.
+          </p>
+          <TextField
+            v-model="form.email"
+            label="Correu electrònic"
+            type="email"
+            autocomplete="email"
+            required
+            :error="errors.email"
+          />
+          <Button type="submit" variant="primary" :loading="loading" :block="true">Enviar enllaç</Button>
+        </form>
 
-      <div class="text-center text-sm">
-        <RouterLink to="/login" class="text-neutral-600 hover:text-neutral-800 underline">
-          Tornar al login
-        </RouterLink>
-      </div>
+        <div class="text-center text-sm">
+          <RouterLink to="/login" class="text-neutral-600 hover:text-neutral-800 underline">
+            Tornar al login
+          </RouterLink>
+        </div>
+      </Card>
     </div>
   </div>
 </template>

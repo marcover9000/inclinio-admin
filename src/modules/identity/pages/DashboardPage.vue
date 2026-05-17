@@ -5,16 +5,22 @@
  */
 import { useAuthStore } from '@/shared/stores/auth';
 import AppShell from '@/shared/components/AppShell.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
+import Card from '@/shared/components/ui/Card.vue';
 
 const auth = useAuthStore();
+const userName = auth.user?.name ?? '';
 </script>
 
 <template>
   <AppShell>
-    <h1 class="text-2xl font-semibold text-neutral-800">Hola, {{ auth.user?.name }}</h1>
-    <p class="text-neutral-600">Rol: <span class="font-mono">{{ auth.user?.role }}</span></p>
-    <p class="text-sm text-neutral-500">
-      Dashboard buit. Les funcionalitats arribaran a Fase 2 (CRM) i posteriors.
-    </p>
+    <PageHeader :title="'Hola, ' + userName" />
+
+    <Card>
+      <p class="text-neutral-600">Rol: <span class="font-mono">{{ auth.user?.role }}</span></p>
+      <p class="text-sm text-neutral-500">
+        Dashboard buit. Les funcionalitats arribaran a Fase 2 (CRM) i posteriors.
+      </p>
+    </Card>
   </AppShell>
 </template>

@@ -8,8 +8,9 @@ import { ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { resetPassword } from '@/modules/identity/api/auth';
 import PasswordField from '@/shared/components/form/PasswordField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -64,33 +65,35 @@ async function handleSubmit() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6">
-      <div class="text-center space-y-1">
-        <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
-        <p class="text-sm text-neutral-500">Estableix una nova contrasenya</p>
-      </div>
+    <div class="w-full max-w-md">
+      <Card>
+        <div class="text-center space-y-1">
+          <h1 class="text-2xl font-semibold text-neutral-800">Inclinio v2</h1>
+          <p class="text-sm text-neutral-500">Estableix una nova contrasenya</p>
+        </div>
 
-      <AlertMessage v-if="globalError" variant="error" :message="globalError" />
+        <AlertMessage v-if="globalError" variant="error" :message="globalError" />
 
-      <form class="space-y-4" @submit.prevent="handleSubmit">
-        <p class="text-sm text-neutral-600">
-          Restablint contrasenya per a <strong>{{ email }}</strong>.
-        </p>
-        <PasswordField
-          v-model="form.password"
-          label="Nova contrasenya"
-          autocomplete="new-password"
-          required
-          :error="errors.password"
-        />
-        <PasswordField
-          v-model="form.password_confirmation"
-          label="Confirmar contrasenya"
-          autocomplete="new-password"
-          required
-        />
-        <SubmitButton :loading="loading" label="Restablir contrasenya" :block="true" />
-      </form>
+        <form class="space-y-4" @submit.prevent="handleSubmit">
+          <p class="text-sm text-neutral-600">
+            Restablint contrasenya per a <strong>{{ email }}</strong>.
+          </p>
+          <PasswordField
+            v-model="form.password"
+            label="Nova contrasenya"
+            autocomplete="new-password"
+            required
+            :error="errors.password"
+          />
+          <PasswordField
+            v-model="form.password_confirmation"
+            label="Confirmar contrasenya"
+            autocomplete="new-password"
+            required
+          />
+          <Button type="submit" variant="primary" :loading="loading" :block="true">Restablir contrasenya</Button>
+        </form>
+      </Card>
     </div>
   </div>
 </template>
