@@ -3,11 +3,13 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   getProject, updateProject, deleteProject, changeProjectStatus, addHoursPack,
+  updateHoursPack, deleteHoursPack,
 } from '../api/projects';
-import type { Project, ProjectStatus } from '../types';
+import type { HoursPack, Project, ProjectStatus } from '../types';
 import { PROJECT_STATUS_LABELS } from '../types';
 import { extractErrorMessage } from '@/shared/http/errors';
-import { emptyPackState, buildPackPayload, packIsValid } from '../pack';
+import { emptyPackState, buildPackPayload, packIsValid, packStateFromResource } from '../pack';
+import type { PackFormState } from '../pack';
 import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import { formatDate } from '@/shared/utils/date';
 import AppShell from '@/shared/components/AppShell.vue';
@@ -32,8 +34,13 @@ const pendingStatus = ref<ProjectStatus | null>(null);
 const { run, loading, errorMsg: actionError } = useAsyncAction();
 const errorMsg = computed(() => actionError.value ?? loadError.value);
 
-const packState = ref(emptyPackState('Ampliació'));
+// Mode edició pack: null = mode "afegir ampliació" (POST), number = id del pack editat (PATCH)
+const editingPackId = ref<number | null>(null);
+const packState = ref<PackFormState>(emptyPackState('Ampliació'));
 const packValid = computed(() => packIsValid(packState.value));
+
+// Pack pendent d'eliminar
+const packToDelete = ref<HoursPack | null>(null);
 
 function clientName(p: Project): string {
   if (p.is_internal) return 'Projecte intern';
@@ -73,13 +80,40 @@ function saveName() {
   }, 'No s\'han pogut desar els canvis.');
 }
 
+function startEditPack(hp: HoursPack) {
+  editingPackId.value = hp.id;
+  packState.value = packStateFromResource(hp);
+}
+
+function cancelEditPack() {
+  editingPackId.value = null;
+  packState.value = emptyPackState('Ampliació');
+}
+
 function submitPack() {
   if (!project.value) return;
+  if (editingPackId.value !== null) {
+    const packId = editingPackId.value;
+    return run(async () => {
+      project.value = await updateHoursPack(project.value!.id, packId, buildPackPayload(packState.value));
+      cancelEditPack();
+    }, 'No s\'ha pogut desar el pack.');
+  }
   return run(async () => {
     await addHoursPack(project.value!.id, buildPackPayload(packState.value));
     packState.value = emptyPackState('Ampliació');
     await load();
   }, 'No s\'ha pogut afegir la bossa d\'hores.');
+}
+
+function confirmDeletePack() {
+  if (!project.value || !packToDelete.value) return;
+  const packId = packToDelete.value.id;
+  return run(async () => {
+    await deleteHoursPack(project.value!.id, packId);
+    packToDelete.value = null;
+    await load();
+  }, 'No s\'ha pogut eliminar el pack.');
 }
 
 function destroy() {
@@ -88,6 +122,11 @@ function destroy() {
     await deleteProject(project.value!.id);
     router.push('/projects');
   }, 'No s\'ha pogut eliminar el projecte.');
+}
+
+function packHoursDisplay(hp: HoursPack): string {
+  if (hp.hours == null) return '—';
+  return `${hp.hours} h`;
 }
 
 onMounted(load);
@@ -110,6 +149,7 @@ onMounted(load);
         <div class="flex items-center gap-3">
           <ProjectStatusBadge :status="project.status" />
           <ProjectStatusSelector :current="project.status" @select="onSelectStatus" />
+          <DangerButton @click="showDelete = true">Eliminar Projecte</DangerButton>
         </div>
       </header>
 
@@ -145,31 +185,50 @@ onMounted(load);
         <table class="mb-4 min-w-full divide-y divide-neutral-200 text-sm">
           <thead>
             <tr class="text-left text-xs uppercase text-neutral-500">
-              <th class="py-2">Data</th><th>Hores</th><th>Preu</th><th>Concepte</th><th>Lead</th>
+              <th class="py-2">Data</th><th>Hores</th><th>Preu</th><th>Concepte</th><th>Lead</th><th></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100">
             <tr v-for="(hp, i) in project.hours_packs ?? []" :key="hp.id">
               <td class="py-2">{{ formatDate(hp.dated_on, '—') }}</td>
-              <td>{{ hp.hours }} h</td>
+              <td>{{ packHoursDisplay(hp) }}</td>
               <td><MoneyText :money="hp.price" /></td>
               <td>{{ i === 0 ? 'Venda inicial' : hp.reason }}</td>
               <td>{{ hp.source_lead_id ? `#${hp.source_lead_id}` : '—' }}</td>
+              <td class="py-2">
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    @click="startEditPack(hp)"
+                    class="text-xs text-brand-600 hover:underline"
+                  >Editar</button>
+                  <button
+                    type="button"
+                    @click="packToDelete = hp"
+                    class="text-xs text-danger-600 hover:underline"
+                  >Eliminar</button>
+                </div>
+              </td>
             </tr>
             <tr v-if="(project.hours_packs?.length ?? 0) === 0">
-              <td colspan="5" class="py-3 text-center text-neutral-500">Cap bossa d'hores encara.</td>
+              <td colspan="6" class="py-3 text-center text-neutral-500">Cap bossa d'hores encara.</td>
             </tr>
           </tbody>
         </table>
 
+        <div v-if="editingPackId !== null" class="mb-2 flex items-center justify-between">
+          <p class="text-sm font-medium text-neutral-700">Editant pack #{{ editingPackId }}</p>
+          <button type="button" @click="cancelEditPack" class="text-xs text-neutral-600 hover:underline">Cancel·lar</button>
+        </div>
         <PackFields v-model="packState" />
-        <SubmitButton class="mt-3" :loading="loading" :disabled="!packValid" @click="submitPack">Afegir ampliació</SubmitButton>
-        <p class="mt-2 text-xs text-neutral-500">Afegir una ampliació a un projecte acabat/arxivat el reobre automàticament.</p>
+        <SubmitButton
+          class="mt-3"
+          :loading="loading"
+          :disabled="!packValid"
+          @click="submitPack"
+        >{{ editingPackId !== null ? 'Desar pack' : 'Afegir ampliació' }}</SubmitButton>
+        <p v-if="editingPackId === null" class="mt-2 text-xs text-neutral-500">Afegir una ampliació a un projecte acabat/arxivat el reobre automàticament.</p>
       </section>
-
-      <div class="flex justify-end">
-        <DangerButton @click="showDelete = true">Eliminar Projecte</DangerButton>
-      </div>
 
       <ConfirmDialog
         :open="pendingStatus !== null"
@@ -177,6 +236,15 @@ onMounted(load);
         :message="`Vols canviar l'estat del projecte a ${pendingStatus ? PROJECT_STATUS_LABELS[pendingStatus] : ''}?`"
         @confirm="confirmStatus"
         @cancel="pendingStatus = null"
+      />
+      <ConfirmDialog
+        :open="packToDelete !== null"
+        title="Eliminar pack"
+        :message="`Estàs segur que vols eliminar el pack «${packToDelete?.reason}»? (soft-delete)`"
+        danger
+        confirm-label="Eliminar"
+        @confirm="confirmDeletePack"
+        @cancel="packToDelete = null"
       />
       <ConfirmDialog
         :open="showDelete"

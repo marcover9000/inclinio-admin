@@ -17,6 +17,7 @@ import DangerButton from '@/shared/components/ui/DangerButton.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
+import ContactProjectsList from '../components/ContactProjectsList.vue';
 
 type CompanyWithRelations = Company & { people?: Person[]; leads?: Lead[] };
 
@@ -196,6 +197,8 @@ onMounted(load);
           <LeadCardRow v-for="lead in company.leads" :key="lead.id" :lead="lead" />
         </div>
       </section>
+
+      <ContactProjectsList :company-id="company.id" />
 
       <ConfirmDialog
         :open="showDelete"

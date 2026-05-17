@@ -1,5 +1,5 @@
 import type { PackPayload } from './api/projects';
-import type { BillingMode } from './types';
+import type { BillingMode, HoursPack } from './types';
 
 /* Estat de formulari d'una venda/pack (inputs com a string, com la resta
    de formularis del projecte). El pare posseeix aquest estat (v-model). */
@@ -31,6 +31,26 @@ export function packTotalCents(s: PackFormState): number | null {
   if (s.priceEuros.trim() === '') return null;
   const p = Number(s.priceEuros);
   return p >= 0 ? Math.round(p * 100) : null;
+}
+
+/* Crea un PackFormState pre-omplert a partir d'un HoursPack existent (per editar). */
+export function packStateFromResource(hp: HoursPack): PackFormState {
+  if (hp.billing_mode === 'hourly') {
+    return {
+      mode: 'hourly',
+      hours: hp.hours != null ? String(hp.hours) : '',
+      priceEuros: '',
+      rateEuros: hp.hourly_rate != null ? String(hp.hourly_rate.cents / 100) : '',
+      reason: hp.reason,
+    };
+  }
+  return {
+    mode: 'fixed',
+    hours: hp.hours != null ? String(hp.hours) : '',
+    priceEuros: String(hp.price.cents / 100),
+    rateEuros: '',
+    reason: hp.reason,
+  };
 }
 
 export function buildPackPayload(s: PackFormState): PackPayload {

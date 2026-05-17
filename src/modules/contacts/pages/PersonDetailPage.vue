@@ -16,6 +16,7 @@ import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 import CompanyPicker from '../components/CompanyPicker.vue';
 import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
+import ContactProjectsList from '../components/ContactProjectsList.vue';
 
 type PersonWithLeads = Person & { leads?: Lead[] };
 
@@ -122,6 +123,8 @@ onMounted(load);
           <LeadCardRow v-for="lead in person.leads" :key="lead.id" :lead="lead" />
         </div>
       </section>
+
+      <ContactProjectsList :person-id="person.id" />
 
       <ConfirmDialog
         :open="showDelete"

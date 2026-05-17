@@ -78,6 +78,15 @@ export async function addHoursPack(projectId: number, pack: PackPayload): Promis
   return data.data;
 }
 
+export async function updateHoursPack(projectId: number, packId: number, pack: PackPayload): Promise<Project> {
+  const { data } = await http.patch<{ data: Project }>(`/api/projects/${projectId}/packs/${packId}`, pack);
+  return data.data;
+}
+
+export async function deleteHoursPack(projectId: number, packId: number): Promise<void> {
+  await http.delete(`/api/projects/${projectId}/packs/${packId}`);
+}
+
 export interface ConvertLeadPayload {
   mode: 'new' | 'extend';
   name?: string;
