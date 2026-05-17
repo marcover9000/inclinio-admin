@@ -5,6 +5,7 @@ import { createProject } from '../api/projects';
 import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
+import DateField from '@/shared/components/form/DateField.vue';
 import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
 import CompanyPicker from '@/modules/contacts/components/CompanyPicker.vue';
@@ -27,9 +28,14 @@ const form = ref({
 const error = ref<string | null>(null);
 const loading = ref(false);
 
+const dueBeforeStart = computed(() =>
+  !!(form.value.startedAt && form.value.dueAt && form.value.dueAt < form.value.startedAt),
+);
+
 const canSubmit = computed(() =>
   form.value.name.trim().length > 0
-  && (form.value.isInternal || form.value.companyId !== null),
+  && (form.value.isInternal || form.value.companyId !== null)
+  && !dueBeforeStart.value,
 );
 
 async function submit() {
@@ -81,8 +87,13 @@ async function submit() {
           />
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <TextField v-model="form.startedAt" label="Inici (AAAA-MM-DD)" placeholder="2026-01-15" />
-          <TextField v-model="form.dueAt" label="Entrega (AAAA-MM-DD)" placeholder="2026-03-31" />
+          <DateField v-model="form.startedAt" label="Inici" />
+          <DateField
+            v-model="form.dueAt"
+            label="Entrega"
+            :min="form.startedAt || undefined"
+            :error="dueBeforeStart ? 'L\'entrega no pot ser anterior a l\'inici.' : undefined"
+          />
         </div>
       </fieldset>
 
