@@ -98,3 +98,29 @@ export async function convertLeadToProject(leadId: number, payload: ConvertLeadP
   const { data } = await http.post<{ data: Project }>(`/api/leads/${leadId}/project`, payload);
   return data.data;
 }
+
+export interface TaskPayload { title: string; status?: string; estimate_hours?: number | null; }
+export interface TimeEntryPayload { worked_on: string; minutes: number; description: string; task_id?: number | null; }
+
+export async function createTask(projectId: number, p: TaskPayload): Promise<Project> {
+  const { data } = await http.post<{ data: Project }>(`/api/projects/${projectId}/tasks`, p);
+  return data.data;
+}
+export async function updateTask(projectId: number, taskId: number, p: TaskPayload): Promise<Project> {
+  const { data } = await http.patch<{ data: Project }>(`/api/projects/${projectId}/tasks/${taskId}`, p);
+  return data.data;
+}
+export async function deleteTask(projectId: number, taskId: number): Promise<void> {
+  await http.delete(`/api/projects/${projectId}/tasks/${taskId}`);
+}
+export async function createTimeEntry(projectId: number, p: TimeEntryPayload): Promise<Project> {
+  const { data } = await http.post<{ data: Project }>(`/api/projects/${projectId}/time-entries`, p);
+  return data.data;
+}
+export async function updateTimeEntry(projectId: number, id: number, p: Partial<TimeEntryPayload>): Promise<Project> {
+  const { data } = await http.patch<{ data: Project }>(`/api/projects/${projectId}/time-entries/${id}`, p);
+  return data.data;
+}
+export async function deleteTimeEntry(projectId: number, id: number): Promise<void> {
+  await http.delete(`/api/projects/${projectId}/time-entries/${id}`);
+}

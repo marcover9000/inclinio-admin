@@ -39,6 +39,9 @@ export interface Project {
   started_at: string | null;
   due_at: string | null;
   hours_packs?: HoursPack[];
+  aggregates?: ProjectAggregates;
+  tasks?: Task[];
+  time_entries?: TimeEntry[];
   created_at: string;
   updated_at: string;
 }
@@ -63,3 +66,40 @@ export const VALID_PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> =
   done: ['archived', 'active'],
   archived: ['active'],
 };
+
+export type TaskStatus = 'todo' | 'doing' | 'done';
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'Per fer',
+  doing: 'En curs',
+  done: 'Feta',
+};
+
+export interface Task {
+  id: number;
+  project_id: number;
+  title: string;
+  status: TaskStatus;
+  status_label: string;
+  estimate_hours: number | null;
+  consumed_hours: number;
+  created_at: string;
+}
+
+export interface TimeEntry {
+  id: number;
+  project_id: number;
+  task_id: number | null;
+  worked_on: string | null;
+  minutes: number;
+  description: string;
+  created_at: string;
+}
+
+export interface ProjectAggregates {
+  consumed_hours: number;
+  overrun_percent: number | null;
+  theoretical_cost: Money;
+  real_margin: Money | null;
+  shadow_rate: Money;
+}
