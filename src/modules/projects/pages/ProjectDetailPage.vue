@@ -189,11 +189,11 @@ onMounted(load);
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100">
-            <tr v-for="(hp, i) in project.hours_packs ?? []" :key="hp.id">
+            <tr v-for="hp in project.hours_packs ?? []" :key="hp.id">
               <td class="py-2">{{ formatDate(hp.dated_on, '—') }}</td>
               <td>{{ packHoursDisplay(hp) }}</td>
               <td><MoneyText :money="hp.price" /></td>
-              <td>{{ i === 0 ? 'Venda inicial' : hp.reason }}</td>
+              <td>{{ hp.reason }}</td>
               <td>{{ hp.source_lead_id ? `#${hp.source_lead_id}` : '—' }}</td>
               <td class="py-2">
                 <div class="flex items-center gap-3">
