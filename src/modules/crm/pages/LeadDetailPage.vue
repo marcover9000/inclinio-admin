@@ -16,6 +16,7 @@ import LeadStatusBadge from '../components/LeadStatusBadge.vue';
 import LeadStatusSelector from '../components/LeadStatusSelector.vue';
 import LeadNoteList from '../components/LeadNoteList.vue';
 import LeadNoteForm from '../components/LeadNoteForm.vue';
+import ConvertLeadToProjectCard from '@/modules/projects/components/ConvertLeadToProjectCard.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -134,6 +135,8 @@ onMounted(load);
         <hr class="my-3" />
         <LeadNoteList :notes="lead.notes ?? []" @delete="onDeleteNote" />
       </section>
+
+      <ConvertLeadToProjectCard v-if="lead.status === 'won'" :lead="lead" />
 
       <div class="flex justify-end">
         <DangerButton @click="showDelete = true">Eliminar Lead</DangerButton>
