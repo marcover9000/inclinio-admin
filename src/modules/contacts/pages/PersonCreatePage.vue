@@ -6,8 +6,10 @@ import { getCompany } from '../api/companies';
 import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import CompanyPicker from '../components/CompanyPicker.vue';
 
 const route = useRoute();
@@ -67,11 +69,10 @@ async function submit() {
 
 <template>
   <AppShell>
-    <h1 class="text-2xl font-semibold">Nova persona</h1>
+    <PageHeader title="Nova persona" />
     <AlertMessage v-if="error" variant="error" :message="error" />
     <form @submit.prevent="submit" class="space-y-6">
-      <fieldset class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Dades de la persona</legend>
+      <Card as="fieldset" title="Dades de la persona">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextField v-model="form.first_name" label="Nom *" />
           <TextField v-model="form.last_name" label="Cognoms" />
@@ -79,10 +80,9 @@ async function submit() {
           <TextField v-model="form.phone" label="Telèfon" />
           <TextField v-model="form.position" label="Càrrec" />
         </div>
-      </fieldset>
+      </Card>
 
-      <fieldset class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Empresa (opcional)</legend>
+      <Card as="fieldset" title="Empresa (opcional)">
         <div class="relative">
           <CompanyPicker
             v-model="form.company_id"
@@ -95,9 +95,11 @@ async function submit() {
             <button type="button" @click="clearCompany" class="text-brand-600 hover:underline">Esborrar</button>
           </p>
         </div>
-      </fieldset>
+      </Card>
 
-      <SubmitButton :loading="loading" :block="true">Crear persona</SubmitButton>
+      <div class="flex justify-end">
+        <Button type="submit" variant="primary" :loading="loading">Crear persona</Button>
+      </div>
     </form>
   </AppShell>
 </template>

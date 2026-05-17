@@ -10,11 +10,12 @@ import { useAsyncAction } from '@/shared/composables/useAsyncAction';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import ConfirmDialog from '@/shared/components/ui/ConfirmDialog.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
-import DangerButton from '@/shared/components/ui/DangerButton.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
 import NotFoundFallback from '@/shared/components/ui/NotFoundFallback.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 import LeadCardRow from '@/modules/crm/components/LeadCardRow.vue';
 import ContactProjectsList from '../components/ContactProjectsList.vue';
@@ -124,11 +125,17 @@ onMounted(load);
   <AppShell>
     <NotFoundFallback v-if="errorMsg && !company" :message="errorMsg" back-to="/companies" back-label="Tornar al llistat" />
     <template v-if="company">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">{{ company.name }}</h1>
-        <ClientBadge v-if="company.is_client" :since="company.became_client_at" />
-      </div>
+      <PageHeader :title="company.name">
+        <template #badge>
+          <ClientBadge v-if="company.is_client" :since="company.became_client_at" />
+        </template>
+        <template #actions>
+          <Button variant="danger" @click="showDelete = true">Eliminar</Button>
+        </template>
+      </PageHeader>
+
       <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
+
       <form @submit.prevent="save" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextField v-model="company.name" label="Nom" />
         <TextField :model-value="company.vat ?? ''" @update:model-value="v => company!.vat = v" label="VAT/CIF" />
@@ -137,22 +144,18 @@ onMounted(load);
         <div class="md:col-span-2">
           <TextareaField :model-value="company.notes ?? ''" @update:model-value="v => company!.notes = v" label="Notes" :rows="5" />
         </div>
-        <div class="md:col-span-2 flex items-center gap-3">
-          <SubmitButton :loading="loading">Desar canvis</SubmitButton>
-          <DangerButton @click="showDelete = true">Eliminar</DangerButton>
+        <div class="md:col-span-2 flex justify-end">
+          <Button type="submit" variant="primary" :loading="loading">Desar canvis</Button>
         </div>
       </form>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <header class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-medium">Persones ({{ company.people?.length ?? 0 }})</h2>
-          <button v-if="!showAddPerson" type="button" @click="showAddPerson = true" class="rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700">
-            + Afegir persona
-          </button>
-        </header>
+      <Card :title="`Persones (${company.people?.length ?? 0})`">
+        <template #actions>
+          <Button v-if="!showAddPerson" variant="primary" size="sm" @click="showAddPerson = true">+ Afegir persona</Button>
+        </template>
 
-        <div v-if="showAddPerson" class="mb-4 rounded border border-brand-200 bg-brand-50 p-3">
-          <div class="flex items-center justify-between mb-2">
+        <div v-if="showAddPerson" class="rounded border border-brand-200 bg-brand-50 p-3 space-y-2">
+          <div class="flex items-center justify-between">
             <p class="text-sm font-medium">Afegir persona existent</p>
             <button type="button" @click="cancelAddPerson" class="text-xs text-neutral-600 hover:underline">Cancel·lar</button>
           </div>
@@ -184,21 +187,22 @@ onMounted(load);
             </RouterLink>
             <div class="flex items-center gap-3">
               <ClientBadge v-if="p.is_client" :since="p.became_client_at" />
-              <button type="button" @click="detachPerson(p)" class="text-xs text-danger-600 hover:underline">Desvincular</button>
+              <Button type="button" variant="danger" size="sm" @click="detachPerson(p)">Desvincular</Button>
             </div>
           </div>
         </div>
-      </section>
+      </Card>
 
-      <section class="rounded border border-neutral-200 p-4">
-        <h2 class="mb-3 text-lg font-medium">Leads ({{ company.leads?.length ?? 0 }})</h2>
+      <Card :title="`Leads (${company.leads?.length ?? 0})`">
         <p v-if="!company.leads?.length" class="text-sm text-neutral-500">Aquesta empresa encara no té cap lead.</p>
         <div v-else class="space-y-2">
           <LeadCardRow v-for="lead in company.leads" :key="lead.id" :lead="lead" />
         </div>
-      </section>
+      </Card>
 
-      <ContactProjectsList :company-id="company.id" />
+      <Card title="Projectes">
+        <ContactProjectsList :company-id="company.id" />
+      </Card>
 
       <ConfirmDialog
         :open="showDelete"

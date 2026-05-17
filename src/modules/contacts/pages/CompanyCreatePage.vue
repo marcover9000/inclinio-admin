@@ -6,8 +6,10 @@ import { extractErrorMessage } from '@/shared/http/errors';
 import AppShell from '@/shared/components/AppShell.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import TextareaField from '@/shared/components/form/TextareaField.vue';
-import SubmitButton from '@/shared/components/form/SubmitButton.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import Card from '@/shared/components/ui/Card.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
 
 const router = useRouter();
 
@@ -44,11 +46,10 @@ async function submit() {
 
 <template>
   <AppShell>
-    <h1 class="text-2xl font-semibold">Nova empresa</h1>
+    <PageHeader title="Nova empresa" />
     <AlertMessage v-if="error" variant="error" :message="error" />
     <form @submit.prevent="submit" class="space-y-6">
-      <fieldset class="rounded border border-neutral-200 p-4">
-        <legend class="px-2 text-sm font-medium">Dades de l'empresa</legend>
+      <Card as="fieldset" title="Dades de l'empresa">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="md:col-span-2">
             <TextField v-model="form.name" label="Nom *" />
@@ -62,9 +63,11 @@ async function submit() {
             <TextareaField v-model="form.notes" label="Notes" :rows="4" />
           </div>
         </div>
-      </fieldset>
+      </Card>
 
-      <SubmitButton :loading="loading" :block="true">Crear empresa</SubmitButton>
+      <div class="flex justify-end">
+        <Button type="submit" variant="primary" :loading="loading">Crear empresa</Button>
+      </div>
     </form>
   </AppShell>
 </template>

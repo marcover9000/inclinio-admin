@@ -10,6 +10,7 @@ import ProjectStatusBadge from '@/modules/projects/components/ProjectStatusBadge
 /*
  * Llista de projectes associats a un contacte (empresa o persona).
  * Reutilitzada a CompanyDetailPage i PersonDetailPage.
+ * El contenidor Card el posa la pàgina pare.
  */
 const props = defineProps<{
   companyId?: number;
@@ -41,23 +42,20 @@ onMounted(load);
 </script>
 
 <template>
-  <section class="rounded border border-neutral-200 p-4">
-    <h2 class="mb-3 text-lg font-medium">Projectes ({{ projects.length }})</h2>
-    <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
-    <p v-else-if="loading" class="text-sm text-neutral-500">Carregant…</p>
-    <p v-else-if="!projects.length" class="text-sm text-neutral-500">Encara no hi ha cap projecte associat.</p>
-    <div v-else class="space-y-2">
-      <div
-        v-for="p in projects"
-        :key="p.id"
-        class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50"
-      >
-        <RouterLink :to="`/projects/${p.id}`" class="flex-1">
-          <p class="text-sm font-medium text-brand-600 hover:underline">{{ p.name }}</p>
-          <p class="text-xs text-neutral-500">{{ p.total_price.formatted }} · {{ p.budgeted_hours }} h</p>
-        </RouterLink>
-        <ProjectStatusBadge :status="p.status" />
-      </div>
+  <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
+  <p v-else-if="loading" class="text-sm text-neutral-500">Carregant…</p>
+  <p v-else-if="!projects.length" class="text-sm text-neutral-500">Encara no hi ha cap projecte associat.</p>
+  <div v-else class="space-y-2">
+    <div
+      v-for="p in projects"
+      :key="p.id"
+      class="flex items-center justify-between rounded border border-neutral-200 p-3 hover:bg-neutral-50"
+    >
+      <RouterLink :to="`/projects/${p.id}`" class="flex-1">
+        <p class="text-sm font-medium text-brand-600 hover:underline">{{ p.name }}</p>
+        <p class="text-xs text-neutral-500">{{ p.total_price.formatted }} · {{ p.budgeted_hours }} h</p>
+      </RouterLink>
+      <ProjectStatusBadge :status="p.status" />
     </div>
-  </section>
+  </div>
 </template>

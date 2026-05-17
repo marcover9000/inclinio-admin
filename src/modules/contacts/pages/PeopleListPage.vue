@@ -7,6 +7,10 @@ import DataTable from '@/shared/components/ui/DataTable.vue';
 import Pagination from '@/shared/components/ui/Pagination.vue';
 import TextField from '@/shared/components/form/TextField.vue';
 import AlertMessage from '@/shared/components/ui/AlertMessage.vue';
+import Button from '@/shared/components/ui/Button.vue';
+import FilterBar from '@/shared/components/ui/FilterBar.vue';
+import PageHeader from '@/shared/components/ui/PageHeader.vue';
+import ToggleChip from '@/shared/components/ui/ToggleChip.vue';
 import ClientBadge from '../components/ClientBadge.vue';
 import { usePaginatedResource } from '@/shared/composables/usePaginatedResource';
 
@@ -25,16 +29,17 @@ const { data, loading, errorMsg, page } = usePaginatedResource({
 
 <template>
   <AppShell>
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Persones</h1>
-      <RouterLink to="/people/new" class="rounded bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-700">+ Nova persona</RouterLink>
-    </div>
-    <div class="flex flex-wrap items-end gap-4">
-      <TextField v-model="search" label="Cerca" placeholder="Nom o email…" />
-      <label class="flex items-center gap-2 text-sm">
-        <input type="checkbox" v-model="onlyClients" /> Només clients
-      </label>
-    </div>
+    <PageHeader title="Persones">
+      <template #actions>
+        <Button variant="primary" :to="{ path: '/people/new' }">+ Nova persona</Button>
+      </template>
+    </PageHeader>
+
+    <FilterBar>
+      <TextField v-model="search" label="Cerca" class="w-72" placeholder="Nom o email…" />
+      <ToggleChip :active="onlyClients" @toggle="onlyClients = !onlyClients">Només clients</ToggleChip>
+    </FilterBar>
+
     <AlertMessage v-if="errorMsg" variant="error" :message="errorMsg" />
     <DataTable
       :rows="data?.data ?? []"
