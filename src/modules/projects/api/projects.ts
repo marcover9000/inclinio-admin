@@ -58,7 +58,7 @@ export async function createProject(payload: CreateProjectPayload): Promise<Proj
 
 export async function updateProject(
   id: number,
-  payload: Partial<Pick<CreateProjectPayload, 'name' | 'is_internal' | 'client_company_id' | 'client_person_id' | 'started_at' | 'due_at'>>,
+  payload: Partial<Pick<CreateProjectPayload, 'name' | 'is_internal' | 'client_company_id' | 'client_person_id' | 'started_at' | 'due_at' | 'shadow_rate_override_cents' | 'shadow_rate_override_currency'>>,
 ): Promise<Project> {
   const { data } = await http.patch<{ data: Project }>(`/api/projects/${id}`, payload);
   return data.data;
