@@ -105,3 +105,29 @@ export interface ProjectAggregates {
   real_margin: Money | null;
   shadow_rate: Money;
 }
+
+export interface DashboardKpis {
+  hours_today: number;
+  hours_week: number;
+  hours_month: number;
+  theoretical_cost: Money;
+  real_margin: Money;
+}
+
+export interface DashboardProjectHours {
+  project_id: number;
+  project_name: string;
+  hours: number;
+}
+
+export interface DashboardBillableSplit {
+  billable_hours: number;
+  internal_hours: number;
+}
+
+export interface DashboardTime {
+  kpis: DashboardKpis;
+  hours_by_project: DashboardProjectHours[];
+  billable_split: DashboardBillableSplit;
+  range: { from: string | null; to: string | null };
+}

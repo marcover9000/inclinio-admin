@@ -1,5 +1,5 @@
 import { http } from '@/shared/http/client';
-import type { BillingMode, Paginated, Project, ProjectStatus, TimeEntry } from '../types';
+import type { BillingMode, DashboardTime, Paginated, Project, ProjectStatus, TimeEntry } from '../types';
 
 export interface ListProjectsParams {
   page?: number;
@@ -134,5 +134,15 @@ export async function listMyTimeEntries(params: MyTimeEntriesParams = {}): Promi
   if (params.project_id) q.project_id = params.project_id;
   if (params.task_id) q.task_id = params.task_id;
   const { data } = await http.get<{ data: TimeEntry[] }>('/api/time-entries', { params: q });
+  return data.data;
+}
+
+export interface DashboardTimeParams { from?: string; to?: string; }
+
+export async function getDashboardTime(params: DashboardTimeParams = {}): Promise<DashboardTime> {
+  const q: Record<string, string> = {};
+  if (params.from) q.from = params.from;
+  if (params.to) q.to = params.to;
+  const { data } = await http.get<{ data: DashboardTime }>('/api/dashboard/time', { params: q });
   return data.data;
 }
